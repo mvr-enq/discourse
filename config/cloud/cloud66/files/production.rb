@@ -25,6 +25,10 @@ Discourse::Application.configure do
   # Specifies the header that your server uses for sending files
   config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect' # for nginx
 
+  config.public_file_server.headers = {
+    'Access-Control-Allow-Origin' => '*'
+  }
+
   # you may use other configuration here for mail eg: sendgrid
 
   config.action_mailer.delivery_method = :smtp
@@ -55,9 +59,9 @@ Discourse::Application.configure do
   # allows Cross-origin resource sharing (CORS) for API access in JavaScript (default to false for security).
   # See the initializer and https://github.com/cyu/rack-cors for configuration documentation.
   #
-  # config.enable_rack_cors = false
-  # config.rack_cors_origins = ['*']
-  # config.rack_cors_resource = ['*', { :headers => :any, :methods => [:get, :post, :options] }]
+   config.enable_rack_cors = true
+   config.rack_cors_origins = ['*']
+   config.rack_cors_resource = ['*', { :headers => :any, :methods => [:get, :post, :options] }]
 
   # Discourse strongly recommend you use a CDN.
   # For origin pull cdns all you need to do is register an account and configure

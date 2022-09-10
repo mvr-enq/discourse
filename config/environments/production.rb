@@ -24,6 +24,10 @@ Discourse::Application.configure do
 
   config.log_level = :info
 
+  config.public_file_server.headers = {
+    'Access-Control-Allow-Origin' => '*'
+  }
+
   if GlobalSetting.smtp_address
     settings = {
       address: GlobalSetting.smtp_address,
@@ -68,6 +72,10 @@ Discourse::Application.configure do
   if emails = GlobalSetting.developer_emails
     config.developer_emails = emails.split(",").map(&:downcase).map(&:strip)
   end
+
+  config.enable_rack_cors = true
+  config.rack_cors_origins = ['*']
+  config.rack_cors_resource = ['*', { :headers => :any, :methods => [:get, :post, :options] }]
 
   config.active_record.dump_schema_after_migration = false
 end
