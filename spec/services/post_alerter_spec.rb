@@ -308,7 +308,7 @@ RSpec.describe PostAlerter do
 
       PostActionNotifier.enable
       Reviewable.set_priorities(high: 4.0)
-      SiteSetting.hide_post_sensitivity = Reviewable.sensitivity[:low]
+      SiteSetting.hide_post_sensitivity = Reviewable.sensitivities[:low]
 
       PostActionCreator.spam(evil_trout, post)
       PostActionCreator.spam(walterwhite, post)
@@ -1321,6 +1321,27 @@ RSpec.describe PostAlerter do
       category.mailinglist_mirror = false
       NotificationEmailer.expects(:process_notification).once
       expect { PostAlerter.post_created(reply) }.to change(user.notifications, :count).by(1)
+    end
+
+    it "creates a notification of type `replied` instead of `posted` for the topic author if they're watching the topic" do
+      Jobs.run_immediately!
+
+      u1 = Fabricate(:admin)
+      u2 = Fabricate(:admin)
+
+      topic = create_topic(user: u1)
+
+      u1.notifications.destroy_all
+
+      expect do
+        create_post(topic: topic, user: u2)
+      end.to change { u1.reload.notifications.count }.by(1)
+      expect(u1.notifications.exists?(
+        topic_id: topic.id,
+        notification_type: Notification.types[:replied],
+        post_number: 1,
+        read: false
+      )).to eq(true)
     end
   end
 

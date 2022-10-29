@@ -184,6 +184,7 @@ ko:
     ok_value: "확인"
     cancel_value: "취소"
     submit: "확인"
+    delete: "삭제하기"
     generic_error: "죄송합니다. 오류가 발생했습니다."
     generic_error_with_reason: "오류가 발생했습니다. %{error}"
     sign_up: "회원가입"
@@ -1012,6 +1013,8 @@ ko:
       enable_defer: "주제를 읽지 않은 상태로 표시하도록 연기 활성화"
       experimental_sidebar:
         options: "옵션"
+        navigation_section: "내비게이션"
+        list_destination_default: "기본"
       change: "변경"
       featured_topic: "추천 주제"
       moderator: "%{user} 님은 운영자입니다"
@@ -1106,6 +1109,7 @@ ko:
         move_to_archive: "보관"
         failed_to_move: "선택한 메시지를 이동하지 못했습니다(네트워크가 다운되었을 수 있음)"
         tags: "태그"
+        all_tags: "모든 태그"
         warnings: "공식 경고"
         read_more_in_group: "더 읽고 싶으신가요? %{groupLink}에서 다른 메시지를 찾아보세요."
       preferences_nav:
@@ -1173,8 +1177,6 @@ ko:
         edit: "편집"
         edit_title: "인증 편집"
         edit_description: "인증 이름"
-        enable_security_key_description: |
-          <a href="https://www.google.com/search?q=hardware+security+key" target="_blank">하드웨어 보안 키</a>가 준비되었다면 아래의 등록 버튼을 누르세요.
         totp:
           title: "토큰 기반 인증"
           add: "인증 추가"
@@ -1182,14 +1184,12 @@ ko:
           name_and_code_required_error: "인증 앱의 이름과 코드를 제공해야 합니다."
         security_key:
           register: "등록"
-          title: "보안 키"
-          add: "보안 키 추가"
           default_name: "기본 보안 키"
+          iphone_default_name: "아이폰"
+          android_default_name: "안드로이드"
           not_allowed_error: "보안 키 등록 프로세스가 시간 초과되었거나 취소되었습니다."
           already_added_error: "이 보안 키는 이미 등록되어 있으므로 다시 등록하지 않아도 됩니다."
-          edit: "보안 키 편집"
           save: "저장"
-          edit_description: "보안 키 이름"
           name_required_error: "보안 키의 이름을 제공해야 합니다."
       change_about:
         title: "내 정보 변경"
@@ -1599,7 +1599,6 @@ ko:
       hide_forever: "괜찮습니다"
       hidden_for_session: "알겠습니다. 내일 알려드리겠습니다. 언제든 '로그인'을 통해서도 계정을 만들 수 있습니다."
       intro: "환영합니다! 토론에 관심이 있지만 아직 계정을 만들지 않은 것 같습니다."
-      value_prop: "계정을 만들면 사이트에서 읽은 글의 히스토리가 저장되고 어디까지 읽었는지 기록되어 더욱 편리하게 이용할 수 있습니다. 또한 누군가가 나에게 댓글을 달면 사이트에서 또는 이메일로 알림을 받을 수 있습니다. 그리고 게시물에 좋아요를 표현할 수도 있습니다. :heartpulse:"
     summary:
       enabled_description: "이 주제의 요약을 보고 있습니다. 커뮤니티에서 선정한 가장 흥미로운 게시물입니다."
       description:
@@ -1622,6 +1621,8 @@ ko:
       leave_message: "이 메시지를 남길까요?"
       remove_allowed_user: "%{name} 님을 메시지에서 제거할까요?"
       remove_allowed_group: "%{name} 님을 메시지에서 제거할까요?"
+      leave: "나가기"
+      remove_user: "사용자 삭제"
     email: "이메일"
     username: "사용자명"
     last_seen: "마지막 접속"
@@ -1677,7 +1678,6 @@ ko:
       second_factor_backup_title: "2단계 백업"
       second_factor_backup_description: "백업 코드 중 하나를 입력하세요."
       second_factor: "인증 앱으로 로그인"
-      security_key_description: "실제 보안 키가 준비되면 보안 키와 함께 아래의 인증 버튼을 누르세요."
       security_key_alternative: "다른 방법으로 시도"
       security_key_authenticate: "보안 키로 인증"
       security_key_not_allowed_error: "보안 키 인증 프로세스가 시간 초과되었거나 취소되었습니다."
@@ -2178,13 +2178,18 @@ ko:
     view_all: "%{tab} 모두 보기"
     user_menu:
       view_all_messages: "모든 개인 메시지 보기"
+      tabs:
+        replies: "댓글"
+        mentions: "멘션"
+        likes: "좋아요 수"
+        bookmarks: "북마크들"
+        profile: "프로필"
       reviewable:
         view_all: "모든 리뷰 항목 보기"
         queue: "대기열"
         deleted_user: "(삭제된 사용자)"
         post_number_with_topic_title: "게시물 #%{post_number} - %{title}"
         new_post_in_topic: "%{title}의 새 게시물"
-        suspicious_user: "의심스러운 사용자 %{username}"
         default_item: "검토 가능한 항목 #%{reviewable_id}"
     topics:
       new_messages_marker: "마지막 방문"
@@ -2768,9 +2773,6 @@ ko:
       delete:
         confirm:
           other: "%{count}개의 게시물을 삭제할까요?"
-      merge:
-        confirm:
-          other: "%{count}개의 게시물을 병합할까요?"
       revisions:
         controls:
           first: "첫 수정 버전"
@@ -3154,6 +3156,7 @@ ko:
         today: "오늘"
         other_periods: "다음 주요 항목 보기:"
     browser_update: '<a href="https://www.discourse.org/faq/#browser">브라우저 버전이 너무 낮아 이 사이트에서 작동하지 않습니다</a>. <a href="https://browsehappy.com">브라우저를 업그레이드</a>하여 서식 있는 콘텐츠를 표시하고 로그인하여 댓글도 달아보세요.'
+    safari_13_warning: 이 사이트는 곧 iOS 및 Safari 버전 13 이하에 대한 지원을 중단할 예정입니다. 단순화된 읽기 전용 버전은 계속 사용할 수 있습니다. (<a href="https://meta.discourse.org/t/224747">더 보기</a>)
     permission_types:
       full: "생성 / 댓글 / 보기"
       create_post: "댓글 / 보기"
@@ -3349,7 +3352,6 @@ ko:
       tag_list_joiner: ", "
       delete_unused: "사용하지 않은 태그 삭제"
       delete_unused_description: "주제 또는 개인 메시지에 첨부되지 않은 모든 태그 삭제"
-      cancel_delete_unused: "취소"
       filters:
         without_category: "%{filter} %{tag} 주제"
         with_category: "%{category}의 %{filter} %{tag} 주제"
@@ -3461,8 +3463,12 @@ ko:
         other: "%{count} unread"
       new_count:
         other: "%{count} new"
-      more: "더 보기..."
+      more: "더 보기"
+      all_categories: "모든 카테고리"
+      all_tags: "모든 태그"
       sections:
+        about:
+          header_link_text: "소개"
         messages:
           header_link_text: "메시지"
           links:
@@ -3499,6 +3505,9 @@ ko:
               content: "내 글"
               draft_count:
                 other: "초안 %{count}"
+            review:
+              content: "검토"
+              title: "검토"
   admin_js:
     type_to_filter: "필터링하려면 입력..."
     admin:
@@ -4673,7 +4682,7 @@ ko:
           other: "모든 게시물을 삭제할 수 없습니다. 일부 게시물은 %{count}일 이전에 작성되었습니다. (delete_user_max_post_age 설정)"
         cant_delete_all_too_many_posts:
           other: "이 사용자는 %{count}개 이상의 게시물을 보유하고 있기 때문에 모든 게시물을 삭제할 수 없습니다. (delete_all_posts_max)"
-        delete_confirm: "기존 토론에서 콘텐츠를 제거하지 않으려면 일반적으로 사용자를 삭제하는 대신 익명화하는 것이 선호됩니다. <br><br>이 사용자를 삭제할까요? 이 작업은 영구적입니다!"
+        delete_confirm_title: "정말로 이 사용자를 삭제하시겠습니까? 이는 영구적입니다!"
         delete_and_block: "이 이메일과 IP 주소를 삭제하고 <b>차단</b>"
         delete_dont_block: "삭제만 하기"
         deleting_user: "사용자 삭제 중..."

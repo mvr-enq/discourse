@@ -1,15 +1,13 @@
 import I18n from "I18n";
 
-import { cached } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { action } from "@ember/object";
 
-import Component from "@glimmer/component";
-import CategorySectionLink from "discourse/lib/sidebar/user/categories-section/category-section-link";
+import { canDisplayCategory } from "discourse/lib/sidebar/helpers";
+import SidebarCommonCategoriesSection from "discourse/components/sidebar/common/categories-section";
 
-export default class SidebarUserCategoriesSection extends Component {
+export default class SidebarUserCategoriesSection extends SidebarCommonCategoriesSection {
   @service router;
-  @service topicTrackingState;
   @service currentUser;
 
   constructor() {
@@ -23,23 +21,15 @@ export default class SidebarUserCategoriesSection extends Component {
   }
 
   willDestroy() {
+    super.willDestroy(...arguments);
+
     this.topicTrackingState.offStateChange(this.callbackId);
   }
 
-  @cached
-  get sectionLinks() {
-    const links = [];
-
-    for (const category of this.currentUser.sidebarCategories) {
-      links.push(
-        new CategorySectionLink({
-          category,
-          topicTrackingState: this.topicTrackingState,
-        })
-      );
-    }
-
-    return links;
+  get categories() {
+    return this.currentUser.sidebarCategories.filter((category) => {
+      return canDisplayCategory(category, this.siteSettings);
+    });
   }
 
   get noCategoriesText() {
@@ -50,6 +40,24 @@ export default class SidebarUserCategoriesSection extends Component {
     )} <a href="${url}">${I18n.t(
       "sidebar.sections.categories.click_to_get_started"
     )}</a>`;
+  }
+
+  /**
+   * If a site has no default sidebar categories configured, show categories section if the user has categories configured.
+   * Otherwise, hide the categories section from the sidebar for the user.
+   *
+   * If a site has default sidebar categories configured, always show categories section for the user.
+   */
+  get shouldDisplay() {
+    if (this.hasDefaultSidebarCategories) {
+      return true;
+    } else {
+      return this.categories.length > 0;
+    }
+  }
+
+  get hasDefaultSidebarCategories() {
+    return this.siteSettings.default_sidebar_categories.length > 0;
   }
 
   @action

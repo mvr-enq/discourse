@@ -1,4 +1,12 @@
-import { click, currentURL, fillIn, settled, visit } from "@ember/test-helpers";
+import {
+  click,
+  currentURL,
+  fillIn,
+  settled,
+  triggerEvent,
+  triggerKeyEvent,
+  visit,
+} from "@ember/test-helpers";
 import { toggleCheckDraftPopup } from "discourse/controllers/composer";
 import { cloneJSON } from "discourse-common/lib/object";
 import TopicFixtures from "discourse/tests/fixtures/topic";
@@ -32,9 +40,29 @@ acceptance("Composer", function (needs) {
   });
   needs.settings({
     enable_whispers: true,
+    general_category_id: 1,
   });
-  needs.site({ can_tag_topics: true });
+  needs.site({
+    can_tag_topics: true,
+    categories: [
+      {
+        id: 1,
+        name: "General",
+        slug: "general",
+        permission: 1,
+        topic_template: null,
+      },
+      {
+        id: 2,
+        name: "test too",
+        slug: "test-too",
+        permission: 1,
+        topic_template: "",
+      },
+    ],
+  });
   needs.pretender((server, helper) => {
+    server.put("/u/kris.json", () => helper.response({ user: {} }));
     server.post("/uploads/lookup-urls", () => {
       return helper.response([]);
     });
@@ -62,6 +90,8 @@ acceptance("Composer", function (needs) {
   test("Composer is opened", async function (assert) {
     await visit("/");
     await click("#create-topic");
+    // Check that General category is selected
+    assert.strictEqual(selectKit(".category-chooser").header().value(), "1");
 
     assert.strictEqual(
       document.documentElement.style.getPropertyValue("--composer-height"),
@@ -96,6 +126,28 @@ acceptance("Composer", function (needs) {
     );
   });
 
+  test("Composer height adjustment", async function (assert) {
+    await visit("/");
+    await click("#create-topic");
+    await triggerEvent(document.querySelector(".grippie"), "mousedown");
+    await triggerEvent(document.querySelector(".grippie"), "mousemove");
+    await triggerEvent(document.querySelector(".grippie"), "mouseup");
+    await visit("/"); // reload page
+    await click("#create-topic");
+
+    const expectedHeight = localStorage.getItem(
+      "__test_discourse_composerHeight"
+    );
+    const actualHeight =
+      document.documentElement.style.getPropertyValue("--composer-height");
+
+    assert.strictEqual(
+      expectedHeight,
+      actualHeight,
+      "Updated height is persistent"
+    );
+  });
+
   test("composer controls", async function (assert) {
     await visit("/");
     assert.ok(exists("#create-topic"), "the create button is visible");
@@ -125,16 +177,29 @@ acceptance("Composer", function (needs) {
 
     await click("#reply-control button.create");
     assert.ok(
-      !exists(".title-input .popup-tip.bad.hide"),
+      exists(".title-input .popup-tip.bad"),
       "it shows the empty title error"
     );
     assert.ok(
-      !exists(".d-editor-wrapper .popup-tip.bad.hide"),
+      exists(".d-editor-textarea-wrapper .popup-tip.bad"),
       "it shows the empty body error"
     );
 
     await fillIn("#reply-title", "this is my new topic title");
-    assert.ok(exists(".title-input .popup-tip.good"), "the title is now good");
+    assert.ok(
+      exists(".title-input .popup-tip.good.hide"),
+      "the title is now good"
+    );
+
+    await triggerKeyEvent(
+      ".d-editor-textarea-wrapper .popup-tip.bad",
+      "keydown",
+      "Enter"
+    );
+    assert.ok(
+      exists(".d-editor-textarea-wrapper .popup-tip.bad.hide"),
+      "body error is dismissed via keyboard"
+    );
 
     await fillIn(".d-editor-input", "this is the *content* of a post");
     assert.strictEqual(
@@ -173,18 +238,23 @@ acceptance("Composer", function (needs) {
     assert.ok(exists(".d-modal"), "it pops up a confirmation dialog");
 
     await click(".modal-footer .discard-draft");
-    assert.ok(!exists(".bootbox.modal"), "the confirmation can be cancelled");
+    assert.ok(!exists(".modal-body"), "the confirmation can be cancelled");
   });
 
   test("Create a topic with server side errors", async function (assert) {
+    pretender.post("/posts", function () {
+      return response(422, { errors: ["That title has already been taken"] });
+    });
+
     await visit("/");
     await click("#create-topic");
     await fillIn("#reply-title", "this title triggers an error");
     await fillIn(".d-editor-input", "this is the *content* of a post");
     await click("#reply-control button.create");
-    assert.ok(exists(".bootbox.modal"), "it pops up an error message");
-    await click(".bootbox.modal a.btn-primary");
-    assert.ok(!exists(".bootbox.modal"), "it dismisses the error");
+    assert.ok(exists(".dialog-body"), "it pops up an error message");
+
+    await click(".dialog-footer .btn-primary");
+    assert.ok(!exists(".dialog-body"), "it dismisses the error");
     assert.ok(exists(".d-editor-input"), "the composer input is visible");
   });
 
@@ -205,6 +275,17 @@ acceptance("Composer", function (needs) {
   });
 
   test("Create an enqueued Topic", async function (assert) {
+    pretender.post("/posts", function () {
+      return response(200, {
+        success: true,
+        action: "enqueued",
+        pending_post: {
+          id: 1234,
+          raw: "enqueue this content please",
+        },
+      });
+    });
+
     await visit("/");
     await click("#create-topic");
     await fillIn("#reply-title", "Internationalization Localization");
@@ -223,13 +304,14 @@ acceptance("Composer", function (needs) {
     await fillIn("#reply-title", "This title doesn't matter");
     await fillIn(".d-editor-input", "custom message");
     await click("#reply-control button.create");
+
     assert.strictEqual(
-      query(".bootbox .modal-body").innerText,
+      query("#dialog-holder .dialog-body").innerText,
       "This is a custom response"
     );
     assert.strictEqual(currentURL(), "/", "it doesn't change routes");
 
-    await click(".bootbox .btn-primary");
+    await click(".dialog-footer .btn-primary");
     assert.strictEqual(
       currentURL(),
       "/faq",
@@ -329,7 +411,7 @@ acceptance("Composer", function (needs) {
 
     await click(".modal-footer button.keep-editing");
 
-    assert.ok(invisible(".discard-draft-modal.modal"));
+    assert.ok(invisible(".discard-draft-modal.modal"), "hides modal");
     await click("#topic-footer-buttons .btn.create");
     assert.ok(
       exists(".discard-draft-modal.modal"),
@@ -346,8 +428,18 @@ acceptance("Composer", function (needs) {
   });
 
   test("Create an enqueued Reply", async function (assert) {
-    await visit("/t/internationalization-localization/280");
+    pretender.post("/posts", function () {
+      return response(200, {
+        success: true,
+        action: "enqueued",
+        pending_post: {
+          id: 1234,
+          raw: "enqueue this content please",
+        },
+      });
+    });
 
+    await visit("/t/internationalization-localization/280");
     assert.ok(!exists(".pending-posts .reviewable-item"));
 
     await click("#topic-footer-buttons .btn.create");
@@ -364,12 +456,10 @@ acceptance("Composer", function (needs) {
         "enqueue this content please",
       "it doesn't insert the post"
     );
-
     assert.ok(visible(".d-modal"), "it pops up a modal");
 
     await click(".modal-footer button");
     assert.ok(invisible(".d-modal"), "the modal can be dismissed");
-
     assert.ok(exists(".pending-posts .reviewable-item"));
   });
 
@@ -764,11 +854,11 @@ acceptance("Composer", function (needs) {
     await click(".topic-post:nth-of-type(1) button.edit");
 
     assert.strictEqual(
-      query(".modal-body").innerText,
+      query(".dialog-body").innerText,
       I18n.t("drafts.abandon.confirm")
     );
 
-    await click(".modal-footer .btn.btn-default");
+    await click(".dialog-footer .btn-resume-editing");
   });
 
   test("Can switch states without abandon popup", async function (assert) {
@@ -826,7 +916,7 @@ acceptance("Composer", function (needs) {
 
     await visit("/u/charlie");
     await click("button.compose-pm");
-    await click(".modal .btn-default");
+    await click(".dialog-footer .btn-resume-editing");
 
     const privateMessageUsers = selectKit("#private-message-users");
     assert.strictEqual(privateMessageUsers.header().value(), "codinghorror");

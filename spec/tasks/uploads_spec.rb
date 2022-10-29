@@ -52,9 +52,9 @@ RSpec.describe "tasks/uploads" do
         uploads.each { |upload| stub_upload(upload) }
       end
 
-      context "when secure media is enabled" do
+      context "when secure upload is enabled" do
         before do
-          SiteSetting.secure_media = true
+          SiteSetting.secure_uploads = true
         end
 
         it "sets an access_control_post for each post upload, using the first linked post in the case of multiple links" do
@@ -155,10 +155,10 @@ RSpec.describe "tasks/uploads" do
     end
   end
 
-  describe "uploads:disable_secure_media" do
+  describe "uploads:disable_secure_uploads" do
     def invoke_task
       capture_stdout do
-        Rake::Task['uploads:disable_secure_media'].invoke
+        Rake::Task['uploads:disable_secure_uploads'].invoke
       end
     end
 
@@ -166,7 +166,7 @@ RSpec.describe "tasks/uploads" do
       setup_s3
       uploads.each { |upload| stub_upload(upload) }
 
-      SiteSetting.secure_media = true
+      SiteSetting.secure_uploads = true
       UploadReference.create(target: post1, upload: upload1)
       UploadReference.create(target: post1, upload: upload2)
       UploadReference.create(target: post2, upload: upload3)
@@ -186,9 +186,9 @@ RSpec.describe "tasks/uploads" do
     let(:upload4) { Fabricate(:upload_s3, secure: true, access_control_post: post2) }
     let(:upload5) { Fabricate(:upload_s3, secure: false) }
 
-    it "disables the secure media setting" do
+    it "disables the secure upload setting" do
       invoke_task
-      expect(SiteSetting.secure_media).to eq(false)
+      expect(SiteSetting.secure_uploads).to eq(false)
     end
 
     it "updates all secure uploads to secure: false" do
@@ -209,13 +209,11 @@ RSpec.describe "tasks/uploads" do
       expect(post2.reload.baked_at).not_to eq_time(1.week.ago)
     end
 
-    it "updates the affected ACLs" do
-      expect_enqueued_with(
-        job: :sync_acls_for_uploads,
-        args: { upload_ids: [upload1.id, upload2.id, upload3.id, upload4.id] },
-      ) do
-        invoke_task
-      end
+    it "updates the affected ACLs via the SyncAclsForUploads job" do
+      invoke_task
+      expect(Jobs::SyncAclsForUploads.jobs.last["args"][0]["upload_ids"]).to match_array(
+        [upload1.id, upload2.id, upload3.id, upload4.id]
+      )
     end
   end
 end

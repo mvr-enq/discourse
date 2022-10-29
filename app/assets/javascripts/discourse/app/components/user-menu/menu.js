@@ -4,6 +4,8 @@ import { action } from "@ember/object";
 import { NO_REMINDER_ICON } from "discourse/models/bookmark";
 import UserMenuTab, { CUSTOM_TABS_CLASSES } from "discourse/lib/user-menu/tab";
 import { inject as service } from "@ember/service";
+import getUrl from "discourse-common/lib/get-url";
+import DiscourseURL from "discourse/lib/url";
 
 const DEFAULT_TAB_ID = "all-notifications";
 const DEFAULT_PANEL_COMPONENT = "user-menu/notifications-list";
@@ -23,6 +25,10 @@ const CORE_TOP_TABS = [
     get panelComponent() {
       return DEFAULT_PANEL_COMPONENT;
     }
+
+    get linkWhenActive() {
+      return `${this.currentUser.path}/notifications`;
+    }
   },
 
   class extends UserMenuTab {
@@ -39,33 +45,27 @@ const CORE_TOP_TABS = [
     }
 
     get count() {
-      return this.getUnreadCountForType("replied");
+      return (
+        this.getUnreadCountForType("mentioned") +
+        this.getUnreadCountForType("posted") +
+        this.getUnreadCountForType("quoted") +
+        this.getUnreadCountForType("replied") +
+        this.getUnreadCountForType("watching_first_post")
+      );
     }
 
     get notificationTypes() {
-      return ["replied"];
-    }
-  },
-
-  class extends UserMenuTab {
-    get id() {
-      return "mentions";
-    }
-
-    get icon() {
-      return "at";
+      return [
+        "mentioned",
+        "posted",
+        "quoted",
+        "replied",
+        "watching_first_post",
+      ];
     }
 
-    get panelComponent() {
-      return "user-menu/mentions-notifications-list";
-    }
-
-    get count() {
-      return this.getUnreadCountForType("mentioned");
-    }
-
-    get notificationTypes() {
-      return ["mentioned"];
+    get linkWhenActive() {
+      return `${this.currentUser.path}/notifications/responses`;
     }
   },
 
@@ -96,6 +96,10 @@ const CORE_TOP_TABS = [
     get notificationTypes() {
       return ["liked", "liked_consolidated", "reaction"];
     }
+
+    get linkWhenActive() {
+      return `${this.currentUser.path}/notifications/likes-received`;
+    }
   },
 
   class extends UserMenuTab {
@@ -116,12 +120,15 @@ const CORE_TOP_TABS = [
     }
 
     get shouldDisplay() {
-      return (
-        this.siteSettings.enable_personal_messages || this.currentUser.staff
-      );
+      return this.currentUser?.can_send_private_messages;
     }
+
     get notificationTypes() {
-      return ["private_message"];
+      return ["private_message", "group_message_summary"];
+    }
+
+    get linkWhenActive() {
+      return `${this.currentUser.path}/messages`;
     }
   },
 
@@ -145,6 +152,10 @@ const CORE_TOP_TABS = [
     get notificationTypes() {
       return ["bookmark_reminder"];
     }
+
+    get linkWhenActive() {
+      return `${this.currentUser.path}/activity/bookmarks`;
+    }
   },
 
   class extends UserMenuTab {
@@ -161,11 +172,17 @@ const CORE_TOP_TABS = [
     }
 
     get shouldDisplay() {
-      return this.currentUser.can_review;
+      return (
+        this.currentUser.can_review && this.currentUser.get("reviewable_count")
+      );
     }
 
     get count() {
       return this.currentUser.get("reviewable_count");
+    }
+
+    get linkWhenActive() {
+      return getUrl("/review");
     }
   },
 ];
@@ -183,6 +200,10 @@ const CORE_BOTTOM_TABS = [
     get panelComponent() {
       return "user-menu/profile-tab-content";
     }
+
+    get linkWhenActive() {
+      return `${this.currentUser.path}/summary`;
+    }
   },
 ];
 
@@ -193,7 +214,7 @@ const CORE_OTHER_NOTIFICATIONS_TAB = class extends UserMenuTab {
   }
 
   get id() {
-    return "other";
+    return "other-notifications";
   }
 
   get icon() {
@@ -300,16 +321,23 @@ export default class UserMenu extends Component {
   }
 
   @action
-  changeTab(tab) {
+  handleTabClick(tab) {
     if (this.currentTabId !== tab.id) {
       this.currentTabId = tab.id;
       this.currentPanelComponent = tab.panelComponent;
       this.currentNotificationTypes = tab.notificationTypes;
+    } else if (tab.linkWhenActive) {
+      DiscourseURL.routeTo(tab.linkWhenActive);
     }
   }
 
   @action
   triggerRenderedAppEvent() {
     this.appEvents.trigger("user-menu:rendered");
+  }
+
+  @action
+  focusFirstTab(topTabsContainerElement) {
+    topTabsContainerElement.querySelector(".btn.active")?.focus();
   }
 }

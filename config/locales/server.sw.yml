@@ -332,8 +332,6 @@ sw:
   meta_category_description: "Majadiliano kuhusu tovuti, shirika, jinsi inavyofanya kazi, na jinsi tunaweza kuiboresha."
   staff_category_name: "Wasaidizi"
   staff_category_description: "Kategoria binafsi kwa ajili ya majadiliano ya wasaidizi. Mada zitaonwa na wasimamizi na viongozi tu."
-  discourse_welcome_topic:
-    title: "Karibu kwenye Discourse"
   category:
     topic_prefix: "Kuhusu kategoria %{category}"
     errors:
@@ -867,7 +865,6 @@ sw:
     min_trust_to_edit_wiki_post: "Kiwango cha chini cha uaminifu kinachohitajika kuhariri machapisho ambayo ni wiki."
     min_trust_to_edit_post: "Kiwango cha chini cha uaminifu kinachohitajika kabla ya kuhariri machapisho."
     min_trust_to_allow_self_wiki: "Kiwango cha chini cha uaminifu kinachohitajika na mtumiaji kuweza kufanya chapisho lake liwe wiki."
-    min_trust_to_send_messages: "kiwango cha chini cha uaminifu kinachohitajika kabla ya kuandika ujumbe mpya binafsi."
     min_trust_to_flag_posts: "Kiwango cha chini cha uaminifu kinachohitajika kabla ya kuweka bendera kwenye machapisho."
     min_trust_to_post_links: "Kiwango cha chini cha uaminifu kinachohitajika kabla ya kuweka viungo kwenye machapisho."
     newuser_max_links: "Viungo vingapi mtumiaji mpya anaweza kuongeza kwenye chapisho."
@@ -1208,7 +1205,6 @@ sw:
     bulk_invite_succeeded:
       title: "Mualiko wa Watumiaji Wengi Umefanikiwa"
       subject_template: "Mualiko wa Watumiaji Wengi umefanikiwa"
-      text_body_template: "Mualiko wa Watumiaji Wengi wa faili umefanyiwa uchakataji, mialiko %{sent} imetumwa."
     bulk_invite_failed:
       title: "Mualiko wa Watumiaji Wengi Umeshindikana"
       subject_template: "Mualiko wa Watumiaji Wengi umepata hitilafu"

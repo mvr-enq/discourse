@@ -135,6 +135,11 @@ class User < ActiveRecord::Base
   after_create :ensure_in_trust_level_group
   after_create :set_default_categories_preferences
   after_create :set_default_tags_preferences
+  after_create :set_default_sidebar_section_links
+
+  after_update :set_default_sidebar_section_links, if: Proc.new  {
+    self.saved_change_to_staged?
+  }
 
   after_update :trigger_user_updated_event, if: Proc.new {
     self.human? && self.saved_change_to_uploaded_avatar_id?
@@ -265,7 +270,7 @@ class User < ActiveRecord::Base
     end
   end
 
-  scope :watching_topic_when_mute_categories_by_default, ->(topic) do
+  scope :watching_topic, ->(topic) do
     joins(DB.sql_fragment("LEFT JOIN category_users ON category_users.user_id = users.id AND category_users.category_id = :category_id", category_id: topic.category_id))
       .joins(DB.sql_fragment("LEFT JOIN topic_users ON topic_users.user_id = users.id AND topic_users.topic_id = :topic_id",  topic_id: topic.id))
       .joins("LEFT JOIN tag_users ON tag_users.user_id = users.id AND tag_users.tag_id IN (#{topic.tag_ids.join(",").presence || 'NULL'})")
@@ -278,6 +283,11 @@ class User < ActiveRecord::Base
   end
 
   MAX_STAFF_DELETE_POST_COUNT ||= 5
+
+  def visible_sidebar_tags(user_guardian = nil)
+    user_guardian ||= guardian
+    DiscourseTagging.filter_visible(custom_sidebar_tags, user_guardian)
+  end
 
   def self.max_password_length
     200
@@ -412,6 +422,14 @@ class User < ActiveRecord::Base
     find_by(username_lower: normalize_username(username))
   end
 
+  def in_any_groups?(group_ids)
+    group_ids.include?(Group::AUTO_GROUPS[:everyone]) || (group_ids & belonging_to_group_ids).any?
+  end
+
+  def belonging_to_group_ids
+    @belonging_to_group_ids ||= group_users.pluck(:group_id)
+  end
+
   def group_granted_trust_level
     GroupUser
       .where(user_id: id)
@@ -495,6 +513,7 @@ class User < ActiveRecord::Base
     @user_fields_cache = nil
     @ignored_user_ids = nil
     @muted_user_ids = nil
+    @belonging_to_group_ids = nil
     super
   end
 
@@ -642,8 +661,24 @@ class User < ActiveRecord::Base
   end
 
   def saw_notification_id(notification_id)
+    Discourse.deprecate(<<~TEXT, since: "2.9", drop_from: "3.0")
+      User#saw_notification_id is deprecated. Please use User#bump_last_seen_notification! instead.
+    TEXT
     if seen_notification_id.to_i < notification_id.to_i
       update_columns(seen_notification_id: notification_id.to_i)
+      true
+    else
+      false
+    end
+  end
+
+  def bump_last_seen_notification!
+    query = self.notifications.visible
+    if seen_notification_id
+      query = query.where("notifications.id > ?", seen_notification_id)
+    end
+    if max_notification_id = query.maximum(:id)
+      update!(seen_notification_id: max_notification_id)
       true
     else
       false
@@ -1380,7 +1415,7 @@ class User < ActiveRecord::Base
 
   def number_of_rejected_posts
     ReviewableQueuedPost
-      .where(status: Reviewable.statuses[:rejected])
+      .rejected
       .where(created_by_id: self.id)
       .count
   end
@@ -1446,6 +1481,8 @@ class User < ActiveRecord::Base
         GroupActionLogger.new(Discourse.system_user, group).log_add_user_to_group(self)
       end
     end
+
+    @belonging_to_group_ids = nil
   end
 
   def email
@@ -1641,25 +1678,6 @@ class User < ActiveRecord::Base
 
   def redesigned_user_menu_enabled?
     SiteSetting.enable_experimental_sidebar_hamburger
-  end
-
-  def sidebar_categories_ids
-    categories_ids = category_sidebar_section_links.pluck(:linkable_id)
-
-    if categories_ids.blank? && SiteSetting.default_sidebar_categories.present?
-      return SiteSetting.default_sidebar_categories.split("|").map(&:to_i) & guardian.allowed_category_ids
-    end
-
-    categories_ids
-  end
-
-  def sidebar_tags
-    return custom_sidebar_tags if custom_sidebar_tags.present?
-    if SiteSetting.default_sidebar_tags.present?
-      tag_names = SiteSetting.default_sidebar_tags.split("|") - DiscourseTagging.hidden_tag_names(guardian)
-      return Tag.where(name: tag_names)
-    end
-    Tag.none
   end
 
   protected
@@ -1889,6 +1907,45 @@ class User < ActiveRecord::Base
   end
 
   private
+
+  def set_default_sidebar_section_links
+    return if !SiteSetting.enable_experimental_sidebar_hamburger
+    return if staged? || bot?
+
+    records = []
+
+    if SiteSetting.default_sidebar_categories.present?
+      category_ids = SiteSetting.default_sidebar_categories.split("|")
+
+      # Filters out categories that user does not have access to or do not exist anymore
+      category_ids = Category.secured(self.guardian).where(id: category_ids).pluck(:id)
+
+      category_ids.each do |category_id|
+        records.push(
+          linkable_type: 'Category',
+          linkable_id: category_id,
+          user_id: self.id
+        )
+      end
+    end
+
+    if SiteSetting.tagging_enabled && SiteSetting.default_sidebar_tags.present?
+      tag_names = SiteSetting.default_sidebar_tags.split("|")
+
+      # Filters out tags that user cannot see or do not exist anymore
+      tag_ids = DiscourseTagging.filter_visible(Tag, self.guardian).where(name: tag_names).pluck(:id)
+
+      tag_ids.each do |tag_id|
+        records.push(
+          linkable_type: 'Tag',
+          linkable_id: tag_id,
+          user_id: self.id
+        )
+      end
+    end
+
+    SidebarSectionLink.insert_all!(records) if records.present?
+  end
 
   def stat
     user_stat || create_user_stat

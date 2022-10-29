@@ -50,6 +50,9 @@ class Guardian
     def is_system_user?
       false
     end
+    def bot?
+      false
+    end
     def secure_category_ids
       []
     end
@@ -69,6 +72,9 @@ class Guardian
       nil
     end
     def whisperer?
+      false
+    end
+    def in_any_groups?(group_ids)
       false
     end
   end
@@ -110,21 +116,18 @@ class Guardian
   end
 
   def is_category_group_moderator?(category)
-    return false if !SiteSetting.enable_category_group_moderation?
     return false if !category
-    return false if !authenticated?
+    return false if !category_group_moderation_allowed?
 
     reviewable_by_group_id = category.reviewable_by_group_id
     return false if reviewable_by_group_id.blank?
 
-    @is_group_member ||= {}
+    @category_group_moderator_groups ||= {}
 
-    if @is_group_member.key?(reviewable_by_group_id)
-      @is_group_member[reviewable_by_group_id]
+    if @category_group_moderator_groups.key?(reviewable_by_group_id)
+      @category_group_moderator_groups[reviewable_by_group_id]
     else
-      @is_group_member[reviewable_by_group_id] = begin
-        GroupUser.where(group_id: reviewable_by_group_id, user_id: @user.id).exists?
-      end
+      @category_group_moderator_groups[reviewable_by_group_id] = category_group_moderator_scope.exists?("categories.id": category.id)
     end
   end
 
@@ -398,7 +401,10 @@ class Guardian
     if object.is_a?(Topic)
       if object.private_message?
         return true if is_admin?
-        return false unless SiteSetting.enable_personal_messages?
+
+        if !@user.in_any_groups?(SiteSetting.personal_message_enabled_groups_map)
+          return false
+        end
         return false if object.reached_recipients_limit? && !is_staff?
       end
 
@@ -443,16 +449,15 @@ class Guardian
     is_user = target.is_a?(User)
     is_group = target.is_a?(Group)
     from_system = @user.is_system_user?
+    from_bot = @user.bot?
 
     (is_group || is_user) &&
     # User is authenticated
     authenticated? &&
-    # Have to be a basic level at least
-    (is_group || @user.has_trust_level?(SiteSetting.min_trust_to_send_messages) || notify_moderators) &&
     # User disabled private message
     (is_staff? || is_group || target.user_option.allow_private_messages) &&
-    # PMs are enabled
-    (is_staff? || SiteSetting.enable_personal_messages || notify_moderators) &&
+    # User can send PMs, this can be covered by trust levels as well via AUTO_GROUPS
+    (is_staff? || from_bot || from_system || (@user.in_any_groups?(SiteSetting.personal_message_enabled_groups_map)) || notify_moderators) &&
     # Can't send PMs to suspended users
     (is_staff? || is_group || !target.suspended?) &&
     # Check group messageable level
@@ -467,7 +472,8 @@ class Guardian
     # User is authenticated
     return false if !authenticated?
     # User is trusted enough
-    SiteSetting.enable_personal_messages && @user.has_trust_level_or_staff?(SiteSetting.min_trust_to_send_email_messages)
+    @user.in_any_groups?(SiteSetting.personal_message_enabled_groups_map) &&
+      @user.has_trust_level_or_staff?(SiteSetting.min_trust_to_send_email_messages)
   end
 
   def can_export_entity?(entity)
@@ -534,7 +540,7 @@ class Guardian
 
   def can_publish_page?(topic)
     return false if !SiteSetting.enable_page_publishing?
-    return false if SiteSetting.secure_media?
+    return false if SiteSetting.secure_uploads?
     return false if topic.blank?
     return false if topic.private_message?
     return false unless can_see_topic?(topic)
@@ -611,6 +617,18 @@ class Guardian
     else
       false
     end
+  end
+
+  protected
+
+  def category_group_moderation_allowed?
+    authenticated? && SiteSetting.enable_category_group_moderation
+  end
+
+  def category_group_moderator_scope
+    Category
+      .joins("INNER JOIN group_users ON group_users.group_id = categories.reviewable_by_group_id")
+      .where("group_users.user_id = ?", user.id)
   end
 
 end

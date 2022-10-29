@@ -49,7 +49,8 @@ class ApplicationController < ActionController::Base
   after_action  :conditionally_allow_site_embedding
   after_action  :ensure_vary_header
   after_action  :add_noindex_header, if: -> { is_feed_request? || !SiteSetting.allow_index_in_robots_txt }
-  after_action  :add_noindex_header_to_non_canonical, if: -> { request.get? && !(request.format && request.format.json?) && !request.xhr? }
+  after_action  :add_noindex_header_to_non_canonical, if: :spa_boot_request?
+  around_action :link_preload, if: -> { spa_boot_request? && GlobalSetting.preload_link_header }
 
   HONEYPOT_KEY ||= 'HONEYPOT_KEY'
   CHALLENGE_KEY ||= 'CHALLENGE_KEY'
@@ -400,11 +401,8 @@ class ApplicationController < ActionController::Base
     if check_current_user && (user = current_user rescue nil)
       locale = user.effective_locale
     else
-      if SiteSetting.set_locale_from_accept_language_header
-        locale = locale_from_header
-      else
-        locale = SiteSetting.default_locale
-      end
+      locale = Discourse.anonymous_locale(request)
+      locale ||= SiteSetting.default_locale
     end
 
     if !I18n.locale_available?(locale)
@@ -623,10 +621,6 @@ class ApplicationController < ActionController::Base
   end
 
   private
-
-  def locale_from_header
-    HttpLanguageParser.parse(request.env["HTTP_ACCEPT_LANGUAGE"])
-  end
 
   def preload_anonymous_data
     store_preloaded("site", Site.json_for(guardian))
@@ -1014,5 +1008,15 @@ class ApplicationController < ActionController::Base
     end
 
     result
+  end
+
+  def link_preload
+    @links_to_preload = []
+    yield
+    response.headers['Link'] = @links_to_preload.join(', ') if !@links_to_preload.empty?
+  end
+
+  def spa_boot_request?
+    request.get? && !(request.format && request.format.json?) && !request.xhr?
   end
 end

@@ -79,7 +79,10 @@ import { modifySelectKit } from "select-kit/mixins/plugin-api";
 import { on } from "@ember/object/evented";
 import { registerCustomAvatarHelper } from "discourse/helpers/user-avatar";
 import { registerCustomPostMessageCallback as registerCustomPostMessageCallback1 } from "discourse/controllers/topic";
-import { registerHighlightJSLanguage } from "discourse/lib/highlight-syntax";
+import {
+  registerHighlightJSLanguage,
+  registerHighlightJSPlugin,
+} from "discourse/lib/highlight-syntax";
 import { registerTopicFooterButton } from "discourse/lib/register-topic-footer-button";
 import { registerTopicFooterDropdown } from "discourse/lib/register-topic-footer-dropdown";
 import { registerDesktopNotificationHandler } from "discourse/lib/desktop-notifications";
@@ -101,12 +104,13 @@ import DiscourseURL from "discourse/lib/url";
 import { registerNotificationTypeRenderer } from "discourse/lib/notification-types-manager";
 import { registerUserMenuTab } from "discourse/lib/user-menu/tab";
 import { registerModelTransformer } from "discourse/lib/model-transformers";
+import { registerHashtagSearchParam } from "discourse/lib/hashtag-autocomplete";
 
 // If you add any methods to the API ensure you bump up the version number
 // based on Semantic Versioning 2.0.0. Please update the changelog at
 // docs/CHANGELOG-JAVASCRIPT-PLUGIN-API.md whenever you change the version
 // using the format described at https://keepachangelog.com/en/1.0.0/.
-const PLUGIN_API_VERSION = "1.3.0";
+const PLUGIN_API_VERSION = "1.4.0";
 
 // This helper prevents us from applying the same `modifyClass` over and over in test mode.
 function canModify(klass, type, resolverName, changes) {
@@ -1219,11 +1223,14 @@ class PluginApi {
   /**
    * Registers a "beforeSave" function on the composer. This allows you to
    * implement custom logic that will happen before the user makes a post.
+   * The passed function is expected to return a promise.
    *
    * Example:
    *
    * api.composerBeforeSave(() => {
-   *   console.log("Before saving, do something!");
+   *   return new Promise(() => {
+   *     console.log("Before saving, do something!")
+   *   })
    * })
    */
   composerBeforeSave(method) {
@@ -1370,6 +1377,26 @@ class PluginApi {
    **/
   registerHighlightJSLanguage(name, fn) {
     registerHighlightJSLanguage(name, fn);
+  }
+
+  /**
+   * Registers custom HighlightJS plugins.
+   *
+   * See https://highlightjs.readthedocs.io/en/latest/plugin-api.html
+   * for instructions on how to define a new plugin for HighlightJS.
+   * This API exposes the Function Based Plugins interface
+   *
+   * Example:
+   *
+   * let aPlugin = {
+       'after:highlightElement': ({ el, result, text }) => {
+         console.log(el);
+       }
+     }
+   * api.registerHighlightJSPlugin(aPlugin);
+   **/
+  registerHighlightJSPlugin(plugin) {
+    registerHighlightJSPlugin(plugin);
   }
 
   /**
@@ -1957,6 +1984,35 @@ class PluginApi {
    */
   registerModelTransformer(modelName, transformer) {
     registerModelTransformer(modelName, transformer);
+  }
+
+  /**
+   * EXPERIMENTAL. Do not use.
+   *
+   * When initiating a search inside the composer or other designated inputs
+   * with the `#` key, we search records based on params registered with
+   * this function, and order them by type using the priority here. Since
+   * there can be many different inputs that use `#` and some may need to
+   * weight different types higher in priority, we also require a context
+   * parameter.
+   *
+   * For example, the topic composer may wish to search for categories
+   * and tags, with categories appearing first in the results. The usage
+   * looks like this:
+   *
+   * api.registerHashtagSearchParam("category", "topic-composer", 100);
+   * api.registerHashtagSearchParam("tag", "topic-composer", 50);
+   *
+   * Additional types of records used for the hashtag search results
+   * can be registered via the #register_hashtag_data_source plugin API
+   * method.
+   *
+   * @param {string} param - The type of record to be fetched.
+   * @param {string} context - Where the hashtag search is being initiated using `#`
+   * @param {number} priority - Used for ordering types of records. Priority order is descending.
+   */
+  registerHashtagSearchParam(param, context, priority) {
+    registerHashtagSearchParam(param, context, priority);
   }
 }
 

@@ -18,14 +18,12 @@ import discourseComputed, {
 import DiscourseURL from "discourse/lib/url";
 import Draft from "discourse/models/draft";
 import I18n from "I18n";
-import { iconHTML } from "discourse-common/lib/icon-library";
 import { Promise } from "rsvp";
-import bootbox from "bootbox";
 import { buildQuote } from "discourse/lib/quote";
 import deprecated from "discourse-common/lib/deprecated";
 import discourseDebounce from "discourse-common/lib/debounce";
 import { emojiUnescape } from "discourse/lib/text";
-import { escapeExpression } from "discourse/lib/utilities";
+import { escapeExpression, modKeysPressed } from "discourse/lib/utilities";
 import { getOwner } from "discourse-common/lib/get-owner";
 import getURL from "discourse-common/lib/get-url";
 import { isEmpty } from "@ember/utils";
@@ -87,6 +85,7 @@ export function addPopupMenuOptionsCallback(callback) {
 export default Controller.extend({
   topicController: controller("topic"),
   router: service(),
+  dialog: service(),
 
   checkedMessages: false,
   messageCount: null,
@@ -333,7 +332,17 @@ export default Controller.extend({
         })
       );
 
-      if (this.site.mobileView) {
+      if (this.capabilities.touch) {
+        options.push(
+          this._setupPopupMenuOption(() => {
+            return {
+              action: "applyFormatCode",
+              icon: "code",
+              label: "composer.code_title",
+            };
+          })
+        );
+
         options.push(
           this._setupPopupMenuOption(() => {
             return {
@@ -499,11 +508,35 @@ export default Controller.extend({
     this.set("model.showFullScreenExitPrompt", false);
   },
 
-  actions: {
-    togglePreview() {
-      this.toggleProperty("showPreview");
-    },
+  @action
+  async cancel(event) {
+    event?.preventDefault();
+    await this.cancelComposer();
+  },
 
+  @action
+  cancelUpload(event) {
+    event?.preventDefault();
+    this.set("model.uploadCancelled", true);
+  },
+
+  @action
+  togglePreview(event) {
+    event?.preventDefault();
+    this.toggleProperty("showPreview");
+  },
+
+  @action
+  viewNewReply(event) {
+    if (event && modKeysPressed(event).length > 0) {
+      return false;
+    }
+    event?.preventDefault();
+    DiscourseURL.routeTo(this.get("model.createdPost.url"));
+    this.close();
+  },
+
+  actions: {
     closeComposer() {
       this.close();
     },
@@ -532,10 +565,6 @@ export default Controller.extend({
       this.model.prependText(continueDiscussion, {
         new_line: true,
       });
-    },
-
-    cancelUpload() {
-      this.set("model.uploadCancelled", true);
     },
 
     onPopupMenuAction(menuAction) {
@@ -618,7 +647,7 @@ export default Controller.extend({
             });
             this.appEvents.trigger("composer-messages:create", {
               extraClass: "custom-body",
-              templateName: "custom-body",
+              templateName: "education",
               body,
             });
             return false;
@@ -698,10 +727,6 @@ export default Controller.extend({
       this.set("model.loading", false);
     },
 
-    async cancel() {
-      await this.cancelComposer();
-    },
-
     save(ignore, event) {
       this.save(false, {
         jump:
@@ -767,7 +792,7 @@ export default Controller.extend({
           if (body) {
             this.appEvents.trigger("composer-messages:create", {
               extraClass: "custom-body",
-              templateName: "custom-body",
+              templateName: "education",
               body,
             });
           }
@@ -779,7 +804,7 @@ export default Controller.extend({
       mentions.forEach((mention) => {
         this.appEvents.trigger("composer-messages:create", {
           extraClass: "custom-body",
-          templateName: "custom-body",
+          templateName: "education",
           body: I18n.t(`composer.cannot_see_mention.${mention.reason}`, {
             username: mention.name,
           }),
@@ -790,12 +815,16 @@ export default Controller.extend({
     hereMention(count) {
       this.appEvents.trigger("composer-messages:create", {
         extraClass: "custom-body",
-        templateName: "custom-body",
+        templateName: "education",
         body: I18n.t("composer.here_mention", {
           here: this.siteSettings.here_mention,
           count,
         }),
       });
+    },
+
+    applyFormatCode() {
+      this.toolbarEvent.formatCode();
     },
 
     applyUnorderedList() {
@@ -858,7 +887,7 @@ export default Controller.extend({
           timeLeft: durationTextFromSeconds(timeLeft),
         });
 
-        bootbox.alert(message);
+        this.dialog.alert(message);
         return;
       } else {
         // Edge case where the user tries to post again immediately.
@@ -885,40 +914,37 @@ export default Controller.extend({
         currentTopic.id !== composer.get("topic.id") &&
         (this.isStaffUser || !currentTopic.closed)
       ) {
-        const message =
-          "<h1>" + I18n.t("composer.posting_not_on_topic") + "</h1>";
-
-        let buttons = [
-          {
-            label: I18n.t("composer.cancel"),
-            class: "btn-flat btn-text btn-reply-where-cancel",
-          },
-        ];
-
-        buttons.push({
-          label:
-            I18n.t("composer.reply_here") +
-            "<br/><div class='topic-title overflow-ellipsis'>" +
-            currentTopic.get("fancyTitle") +
-            "</div>",
-          class: "btn-reply-here",
-          callback: () => {
-            composer.setProperties({ topic: currentTopic, post: null });
-            this.save(true);
-          },
+        this.dialog.alert({
+          title: I18n.t("composer.posting_not_on_topic"),
+          buttons: [
+            {
+              label:
+                I18n.t("composer.reply_original") +
+                "<br/><div class='topic-title overflow-ellipsis'>" +
+                this.get("model.topic.fancyTitle") +
+                "</div>",
+              class: "btn-primary btn-reply-on-original",
+              action: () => this.save(true),
+            },
+            {
+              label:
+                I18n.t("composer.reply_here") +
+                "<br/><div class='topic-title overflow-ellipsis'>" +
+                currentTopic.get("fancyTitle") +
+                "</div>",
+              class: "btn-reply-here",
+              action: () => {
+                composer.setProperties({ topic: currentTopic, post: null });
+                this.save(true);
+              },
+            },
+            {
+              label: I18n.t("composer.cancel"),
+              class: "btn-flat btn-text btn-reply-where-cancel",
+            },
+          ],
+          class: "reply-where-modal",
         });
-
-        buttons.push({
-          label:
-            I18n.t("composer.reply_original") +
-            "<br/><div class='topic-title overflow-ellipsis'>" +
-            this.get("model.topic.fancyTitle") +
-            "</div>",
-          class: "btn-primary btn-reply-on-original",
-          callback: () => this.save(true),
-        });
-
-        bootbox.dialog(message, buttons, { classes: "reply-where-modal" });
         return;
       }
     }
@@ -987,8 +1013,11 @@ export default Controller.extend({
           // TODO: await this:
           this.destroyDraft();
           if (result.responseJson.message) {
-            return bootbox.alert(result.responseJson.message, () => {
-              DiscourseURL.routeTo(result.responseJson.route_to);
+            return this.dialog.alert({
+              message: result.responseJson.message,
+              didConfirm: () => {
+                DiscourseURL.routeTo(result.responseJson.route_to);
+              },
             });
           }
           return DiscourseURL.routeTo(result.responseJson.route_to);
@@ -1010,7 +1039,9 @@ export default Controller.extend({
       .catch((error) => {
         composer.set("disableDrafts", false);
         if (error) {
-          this.appEvents.one("composer:will-open", () => bootbox.alert(error));
+          this.appEvents.one("composer:will-open", () =>
+            this.dialog.alert(error)
+          );
         }
       });
 
@@ -1238,11 +1269,7 @@ export default Controller.extend({
       this.model.set("reply", opts.topicBody);
     }
 
-    // The two custom properties below can be overriden by themes/plugins to set different default composer heights.
-    const defaultComposerHeight =
-      this.model.action === "reply"
-        ? "var(--reply-composer-height, 300px)"
-        : "var(--new-topic-composer-height, 400px)";
+    const defaultComposerHeight = this._getDefaultComposerHeight();
 
     this.set("model.composerHeight", defaultComposerHeight);
     document.documentElement.style.setProperty(
@@ -1251,10 +1278,17 @@ export default Controller.extend({
     );
   },
 
-  viewNewReply() {
-    DiscourseURL.routeTo(this.get("model.createdPost.url"));
-    this.close();
-    return false;
+  _getDefaultComposerHeight() {
+    if (this.keyValueStore.getItem("composerHeight")) {
+      return this.keyValueStore.getItem("composerHeight");
+    }
+
+    // The two custom properties below can be overriden by themes/plugins to set different default composer heights.
+    if (this.model.action === "reply") {
+      return "var(--reply-composer-height, 300px)";
+    } else {
+      return "var(--new-topic-composer-height, 400px)";
+    }
   },
 
   async destroyDraft(draftSequence = null) {
@@ -1295,23 +1329,27 @@ export default Controller.extend({
     }
 
     return new Promise((resolve) => {
-      bootbox.dialog(I18n.t("drafts.abandon.confirm"), [
-        {
-          label: I18n.t("drafts.abandon.no_value"),
-          callback: () => resolve(data),
-        },
-        {
-          label: I18n.t("drafts.abandon.yes_value"),
-          class: "btn-danger",
-          icon: iconHTML("far-trash-alt"),
-          callback: () => {
-            this.destroyDraft(data.draft_sequence).finally(() => {
-              data.draft = null;
-              resolve(data);
-            });
+      this.dialog.alert({
+        message: I18n.t("drafts.abandon.confirm"),
+        buttons: [
+          {
+            label: I18n.t("drafts.abandon.yes_value"),
+            class: "btn-danger",
+            icon: "far-trash-alt",
+            action: () => {
+              this.destroyDraft(data.draft_sequence).finally(() => {
+                data.draft = null;
+                resolve(data);
+              });
+            },
           },
-        },
-      ]);
+          {
+            label: I18n.t("drafts.abandon.no_value"),
+            class: "btn-resume-editing",
+            action: () => resolve(data),
+          },
+        ],
+      });
     });
   },
 

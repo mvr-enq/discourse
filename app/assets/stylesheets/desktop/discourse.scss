@@ -56,17 +56,17 @@ input,
 button,
 select,
 textarea {
-  font-size: $font-0;
+  font-size: var(--font-0);
   font-weight: normal;
-  line-height: $line-height-medium;
+  line-height: var(--line-height-medium);
 }
 
 select,
 textarea {
   display: inline-block;
   margin-bottom: 9px;
-  font-size: $font-0;
-  line-height: $line-height-large;
+  font-size: var(--font-0);
+  line-height: var(--line-height-large);
   color: var(--primary);
 }
 
@@ -77,7 +77,7 @@ textarea {
 
 select,
 input[type="file"] {
-  line-height: $line-height-large;
+  line-height: var(--line-height-large);
 }
 
 select {
@@ -195,7 +195,7 @@ body.has-sidebar-page {
 
   #main-outlet-wrapper {
     grid-template-columns: var(--d-sidebar-width) minmax(0, 1fr);
-    gap: 0 1em;
+    gap: 0 2em;
     padding-left: 0;
   }
 }

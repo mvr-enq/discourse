@@ -221,15 +221,15 @@ RSpec.describe CurrentUserSerializer do
   end
 
   describe '#sidebar_tags' do
-    fab!(:tag_1) { Fabricate(:tag, name: "foo") }
-    fab!(:tag_2) { Fabricate(:tag, name: "bar") }
+    fab!(:tag) { Fabricate(:tag, name: "foo") }
+    fab!(:pm_tag) { Fabricate(:tag, name: "bar", pm_topic_count: 5, topic_count: 0) }
     fab!(:hidden_tag) { Fabricate(:tag, name: "secret") }
     fab!(:staff_tag_group) { Fabricate(:tag_group, permissions: { "staff" => 1 }, tag_names: ["secret"]) }
-    let(:tag_sidebar_section_link) { Fabricate(:tag_sidebar_section_link, user: user) }
-    let(:tag_sidebar_section_link_2) { Fabricate(:tag_sidebar_section_link, user: user) }
+    fab!(:tag_sidebar_section_link) { Fabricate(:tag_sidebar_section_link, user: user, linkable: tag) }
+    fab!(:tag_sidebar_section_link_2) { Fabricate(:tag_sidebar_section_link, user: user, linkable: pm_tag) }
+    fab!(:tag_sidebar_section_link_3) { Fabricate(:tag_sidebar_section_link, user: user, linkable: hidden_tag) }
 
     it "is not included when experimental sidebar has not been enabled" do
-      tag_sidebar_section_link
       SiteSetting.enable_experimental_sidebar_hamburger = false
       SiteSetting.tagging_enabled = true
 
@@ -239,7 +239,6 @@ RSpec.describe CurrentUserSerializer do
     end
 
     it "is not included when tagging has not been enabled" do
-      tag_sidebar_section_link
       SiteSetting.enable_experimental_sidebar_hamburger = true
       SiteSetting.tagging_enabled = false
 
@@ -248,56 +247,39 @@ RSpec.describe CurrentUserSerializer do
       expect(json[:sidebar_tags]).to eq(nil)
     end
 
-    it "is present when experimental sidebar and tagging has been enabled" do
-      tag_sidebar_section_link
+    it "serializes only the tags that the user can see when experimental sidebar and tagging has been enabled" do
       SiteSetting.enable_experimental_sidebar_hamburger = true
       SiteSetting.tagging_enabled = true
-
-      tag_sidebar_section_link_2.linkable.update!(pm_topic_count: 5, topic_count: 0)
 
       json = serializer.as_json
 
       expect(json[:sidebar_tags]).to contain_exactly(
-        { name: tag_sidebar_section_link.linkable.name, pm_only: false },
-        { name: tag_sidebar_section_link_2.linkable.name, pm_only: true }
+        { name: tag.name, pm_only: false },
+        { name: pm_tag.name, pm_only: true }
       )
-    end
 
-    it 'includes visible default sidebar tags' do
-      SiteSetting.enable_experimental_sidebar_hamburger = true
-      SiteSetting.tagging_enabled = true
-      SiteSetting.default_sidebar_tags = "foo|bar|secret"
+      user.update!(admin: true)
 
       json = serializer.as_json
 
-      expect(json[:sidebar_tags]).to eq([
-        { name: "foo", pm_only: false },
-        { name: "bar", pm_only: false }
-      ])
-    end
-
-    it 'includes tags choosen by user' do
-      SiteSetting.enable_experimental_sidebar_hamburger = true
-      SiteSetting.tagging_enabled = true
-      SiteSetting.default_sidebar_tags = "foo|bar|secret"
-      tag_sidebar_section_link = Fabricate(:tag_sidebar_section_link, user: user)
-
-      json = serializer.as_json
-
-      expect(json[:sidebar_tags]).to eq([
-        { name: tag_sidebar_section_link.linkable.name, pm_only: false }
-      ])
+      expect(json[:sidebar_tags]).to contain_exactly(
+        { name: tag.name, pm_only: false },
+        { name: pm_tag.name, pm_only: true },
+        { name: hidden_tag.name, pm_only: false }
+      )
     end
   end
 
   describe '#sidebar_category_ids' do
+    fab!(:group) { Fabricate(:group) }
     fab!(:category) { Fabricate(:category) }
     fab!(:category_2) { Fabricate(:category) }
-    fab!(:private_category) { Fabricate(:private_category, group: Fabricate(:group)) }
-    let(:category_sidebar_section_link) { Fabricate(:category_sidebar_section_link, user: user) }
-    let(:category_sidebar_section_link_2) { Fabricate(:category_sidebar_section_link, user: user) }
+    fab!(:private_category) { Fabricate(:private_category, group: group) }
+    fab!(:category_sidebar_section_link) { Fabricate(:category_sidebar_section_link, user: user, linkable: category) }
+    fab!(:category_sidebar_section_link_2) { Fabricate(:category_sidebar_section_link, user: user, linkable: category_2) }
+    fab!(:category_sidebar_section_link_3) { Fabricate(:category_sidebar_section_link, user: user, linkable: private_category) }
 
-    it "is not included when SiteSeting.enable_experimental_sidebar_hamburger is false" do
+    it "is not included when SiteSetting.enable_experimental_sidebar_hamburger is false" do
       category_sidebar_section_link
       SiteSetting.enable_experimental_sidebar_hamburger = false
 
@@ -307,7 +289,6 @@ RSpec.describe CurrentUserSerializer do
     end
 
     it "is not included when experimental sidebar has not been enabled" do
-      category_sidebar_section_link
       SiteSetting.enable_experimental_sidebar_hamburger = false
 
       json = serializer.as_json
@@ -315,23 +296,25 @@ RSpec.describe CurrentUserSerializer do
       expect(json[:sidebar_category_ids]).to eq(nil)
     end
 
-    it 'includes visible default sidebar categories' do
+    it 'serializes only the categories that the user can see when experimental sidebar and tagging has been enabled"' do
       SiteSetting.enable_experimental_sidebar_hamburger = true
-      SiteSetting.default_sidebar_categories = "#{category.id}|#{category_2.id}|#{private_category.id}"
 
       json = serializer.as_json
-      expect(json[:sidebar_category_ids]).to eq([category.id, category_2.id])
-    end
 
-    it 'includes categories choosen by user' do
-      SiteSetting.enable_experimental_sidebar_hamburger = true
-      SiteSetting.default_sidebar_categories = "#{category.id}|#{category_2.id}|#{private_category.id}"
+      expect(json[:sidebar_category_ids]).to eq([
+        category.id,
+        category_2.id
+      ])
 
-      category_sidebar_section_link
-      category_sidebar_section_link_2
-
+      group.add(user)
+      serializer = described_class.new(user, scope: Guardian.new(user), root: false)
       json = serializer.as_json
-      expect(json[:sidebar_category_ids]).to eq([category_sidebar_section_link.linkable.id, category_sidebar_section_link_2.linkable.id])
+
+      expect(json[:sidebar_category_ids]).to eq([
+        category.id,
+        category_2.id,
+        private_category.id
+      ])
     end
   end
 
@@ -350,4 +333,52 @@ RSpec.describe CurrentUserSerializer do
       expect(serializer.as_json[:likes_notifications_disabled]).to eq(false)
     end
   end
+
+  describe '#redesigned_user_page_nav_enabled' do
+    fab!(:group) { Fabricate(:group) }
+    fab!(:group2) { Fabricate(:group) }
+
+    it "is false when enable_new_user_profile_nav_groups site setting has not been set" do
+      expect(serializer.as_json[:redesigned_user_page_nav_enabled]).to eq(false)
+    end
+
+    it 'is false if user does not belong to any of the configured groups in the enable_new_user_profile_nav_groups site setting' do
+      SiteSetting.enable_new_user_profile_nav_groups = "#{group.id}|#{group2.id}"
+
+      expect(serializer.as_json[:redesigned_user_page_nav_enabled]).to eq(false)
+    end
+
+    it 'is true if user belongs one of the configured groups in the enable_new_user_profile_nav_groups site setting' do
+      SiteSetting.enable_new_user_profile_nav_groups = "#{group.id}|#{group2.id}"
+      group.add(user)
+
+      expect(serializer.as_json[:redesigned_user_page_nav_enabled]).to eq(true)
+    end
+  end
+
+  describe '#associated_account_ids' do
+    before do
+      UserAssociatedAccount.create(user_id: user.id, provider_name: "twitter", provider_uid: "1", info: { nickname: "sam" })
+    end
+
+    it 'should not include associated account ids by default' do
+      expect(serializer.as_json[:associated_account_ids]).to be_nil
+    end
+
+    it 'should include associated account ids when site setting enabled' do
+      SiteSetting.include_associated_account_ids = true
+      expect(serializer.as_json[:associated_account_ids]).to eq({ "twitter" => "1" })
+    end
+  end
+
+  describe "#sidebar_list_destination" do
+    it "returns choosen value or default" do
+      expect(serializer.as_json[:sidebar_list_destination]).to eq(SiteSetting.default_sidebar_list_destination)
+
+      user.user_option.update!(sidebar_list_destination: "unread_new")
+      expect(serializer.as_json[:sidebar_list_destination]).to eq("unread_new")
+    end
+  end
+
+  include_examples "#display_sidebar_tags", described_class
 end

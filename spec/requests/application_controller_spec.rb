@@ -895,6 +895,44 @@ RSpec.describe ApplicationController do
         end
       end
     end
+
+    context "with set_locale_from_cookie enabled" do
+      context "when cookie locale differs from default locale" do
+        before do
+          SiteSetting.allow_user_locale = true
+          SiteSetting.set_locale_from_cookie = true
+          SiteSetting.default_locale = "en"
+        end
+
+        context "with an anonymous user" do
+          it "uses the locale from the cookie" do
+            get "/bootstrap.json", headers: { Cookie: "locale=es" }
+            expect(response.status).to eq(200)
+            expect(response.parsed_body['bootstrap']['locale_script']).to end_with("es.js")
+            expect(I18n.locale.to_s).to eq(SiteSettings::DefaultsProvider::DEFAULT_LOCALE) # doesn't leak after requests
+          end
+        end
+
+        context "when the preferred locale includes a region" do
+          it "returns the locale and region separated by an underscore" do
+            get "/bootstrap.json", headers: { Cookie: "locale=zh-CN" }
+            expect(response.status).to eq(200)
+            expect(response.parsed_body['bootstrap']['locale_script']).to end_with("zh_CN.js")
+          end
+        end
+      end
+
+      context 'when locale cookie is not set' do
+        it 'uses the site default locale' do
+          SiteSetting.allow_user_locale = true
+          SiteSetting.default_locale = 'en'
+
+          get "/bootstrap.json", headers: { Cookie: "" }
+          expect(response.status).to eq(200)
+          expect(response.parsed_body['bootstrap']['locale_script']).to end_with("en.js")
+        end
+      end
+    end
   end
 
   describe 'vary header' do
@@ -1083,6 +1121,40 @@ RSpec.describe ApplicationController do
           json = JSON.parse(element.current_scope.attribute('data-preloaded').value)
           expect(JSON.parse(json['banner'])["html"]).to eq("<p>A banner topic</p>")
         end
+      end
+    end
+  end
+
+  describe 'preload Link header' do
+    context "with GlobalSetting.preload_link_header" do
+      before do
+        global_setting :preload_link_header, true
+      end
+
+      it "should have the Link header with assets on full page requests" do
+        get("/latest")
+        expect(response.headers).to include('Link')
+      end
+
+      it "shouldn't have the Link header on xhr api requests" do
+        get("/latest.json")
+        expect(response.headers).not_to include('Link')
+      end
+    end
+
+    context "without GlobalSetting.preload_link_header" do
+      before do
+        global_setting :preload_link_header, false
+      end
+
+      it "shouldn't have the Link header with assets on full page requests" do
+        get("/latest")
+        expect(response.headers).not_to include('Link')
+      end
+
+      it "shouldn't have the Link header on xhr api requests" do
+        get("/latest.json")
+        expect(response.headers).not_to include('Link')
       end
     end
   end

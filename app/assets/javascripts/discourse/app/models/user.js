@@ -1,7 +1,15 @@
 import EmberObject, { computed, get, getProperties } from "@ember/object";
 import cookie, { removeCookie } from "discourse/lib/cookie";
 import { defaultHomepage, escapeExpression } from "discourse/lib/utilities";
-import { alias, equal, filterBy, gt, mapBy, or } from "@ember/object/computed";
+import {
+  alias,
+  equal,
+  filterBy,
+  gt,
+  mapBy,
+  or,
+  readOnly,
+} from "@ember/object/computed";
 import getURL, { getURLWithCDN } from "discourse-common/lib/get-url";
 import { A } from "@ember/array";
 import Badge from "discourse/models/badge";
@@ -35,6 +43,7 @@ import Evented from "@ember/object/evented";
 import { cancel } from "@ember/runloop";
 import discourseLater from "discourse-common/lib/later";
 import { isTesting } from "discourse-common/config/environment";
+import { hidePopup, showNextPopup, showPopup } from "discourse/lib/popup";
 
 export const SECOND_FACTOR_METHODS = {
   TOTP: 1,
@@ -68,6 +77,7 @@ let userFields = [
   "user_notification_schedule",
   "sidebar_category_ids",
   "sidebar_tag_names",
+  "status",
 ];
 
 export function addSaveableUserField(fieldName) {
@@ -104,8 +114,10 @@ let userOptionFields = [
   "title_count_mode",
   "timezone",
   "skip_new_user_tips",
+  "seen_popups",
   "default_calendar",
   "bookmark_auto_delete_preference",
+  "sidebar_list_destination",
 ];
 
 export function addSaveableUserOptionField(fieldName) {
@@ -333,19 +345,12 @@ const User = RestModel.extend({
       return [];
     }
 
-    return Site.current()
-      .categoriesList.filter((category) => {
-        if (
-          this.siteSettings.suppress_uncategorized_badge &&
-          category.isUncategorizedCategory
-        ) {
-          return false;
-        }
-
-        return sidebarCategoryIds.includes(category.id);
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return Site.current().categoriesList.filter((category) =>
+      sidebarCategoryIds.includes(category.id)
+    );
   },
+
+  sidebarListDestination: readOnly("sidebar_list_destination"),
 
   changeUsername(new_username) {
     return ajax(userPath(`${this.username_lower}/preferences/username`), {
@@ -450,7 +455,7 @@ const User = RestModel.extend({
           "external_links_in_new_tab",
           "dynamic_favicon"
         );
-        User.current().setProperties(userProps);
+        User.current()?.setProperties(userProps);
         this.setProperties(updatedState);
         return result;
       })
@@ -581,25 +586,27 @@ const User = RestModel.extend({
     });
   },
 
-  loadUserAction(id) {
-    const stream = this.stream;
-    return ajax(`/user_actions/${id}.json`).then((result) => {
-      if (result && result.user_action) {
-        const ua = result.user_action;
+  async loadUserAction(id) {
+    const result = await ajax(`/user_actions/${id}.json`);
 
-        if ((this.get("stream.filter") || ua.action_type) !== ua.action_type) {
-          return;
-        }
-        if (!this.get("stream.filter") && !this.inAllStream(ua)) {
-          return;
-        }
+    if (!result?.user_action) {
+      return;
+    }
 
-        ua.title = emojiUnescape(escapeExpression(ua.title));
-        const action = UserAction.collapseStream([UserAction.create(ua)]);
-        stream.set("itemsLoaded", stream.get("itemsLoaded") + 1);
-        stream.get("content").insertAt(0, action[0]);
-      }
-    });
+    const ua = result.user_action;
+
+    if ((this.get("stream.filter") || ua.action_type) !== ua.action_type) {
+      return;
+    }
+
+    if (!this.get("stream.filter") && !this.inAllStream(ua)) {
+      return;
+    }
+
+    ua.title = emojiUnescape(escapeExpression(ua.title));
+    const action = UserAction.collapseStream([UserAction.create(ua)]);
+    this.stream.set("itemsLoaded", this.stream.get("itemsLoaded") + 1);
+    this.stream.get("content").insertAt(0, action[0]);
   },
 
   inAllStream(ua) {
@@ -631,6 +638,20 @@ const User = RestModel.extend({
   @discourseComputed("filteredGroups", "numGroupsToDisplay")
   showMoreGroupsLink(filteredGroups, numGroupsToDisplay) {
     return filteredGroups.length > numGroupsToDisplay;
+  },
+
+  // NOTE: This only includes groups *visible* to the user via the serializer,
+  // so be wary when using this.
+  isInAnyGroups(groupIds) {
+    if (!this.groups) {
+      return;
+    }
+
+    // auto group ID 0 is "everyone"
+    return (
+      groupIds.includes(0) ||
+      this.groups.mapBy("id").some((groupId) => groupIds.includes(groupId))
+    );
   },
 
   // The user's stat count, excluding PMs.
@@ -1054,6 +1075,11 @@ const User = RestModel.extend({
     this.appEvents.trigger("user-drafts:changed");
   },
 
+  updateReviewableCount(count) {
+    this.set("reviewable_count", count);
+    this.appEvents.trigger("user-reviewable-count:changed", count);
+  },
+
   isInDoNotDisturb() {
     return (
       this.do_not_disturb_until &&
@@ -1068,6 +1094,65 @@ const User = RestModel.extend({
   )
   trackedTags(trackedTags, watchedTags, watchingFirstPostTags) {
     return [...trackedTags, ...watchedTags, ...watchingFirstPostTags];
+  },
+
+  showPopup(options) {
+    const popupTypes = Site.currentProp("onboarding_popup_types");
+    if (!popupTypes[options.id]) {
+      // eslint-disable-next-line no-console
+      console.warn("Cannot display popup with type =", options.id);
+      return;
+    }
+
+    const seenPopups = this.seen_popups || [];
+    if (seenPopups.includes(popupTypes[options.id])) {
+      return;
+    }
+
+    showPopup({
+      ...options,
+      onDismiss: () => this.hidePopupForever(options.id),
+      onDismissAll: () => this.hidePopupForever(),
+    });
+  },
+
+  hidePopupForever(popupId) {
+    // Empty popupId means all popups.
+    const popupTypes = Site.currentProp("onboarding_popup_types");
+    if (popupId && !popupTypes[popupId]) {
+      // eslint-disable-next-line no-console
+      console.warn("Cannot hide popup with type =", popupId);
+      return;
+    }
+
+    // Hide any shown popups.
+    let seenPopups = this.seen_popups || [];
+    if (popupId) {
+      hidePopup(popupId);
+      if (!seenPopups.includes(popupTypes[popupId])) {
+        seenPopups.push(popupTypes[popupId]);
+      }
+    } else {
+      Object.keys(popupTypes).forEach(hidePopup);
+      seenPopups = Object.values(popupTypes);
+    }
+
+    // Show next popup in queue.
+    showNextPopup();
+
+    // Save seen popups on the server.
+    if (!this.user_option) {
+      this.set("user_option", {});
+    }
+    this.set("seen_popups", seenPopups);
+    this.set("user_option.seen_popups", seenPopups);
+    if (popupId) {
+      return this.save(["seen_popups"]);
+    } else {
+      this.set("skip_new_user_tips", true);
+      this.set("user_option.skip_new_user_tips", true);
+      return this.save(["seen_popups", "skip_new_user_tips"]);
+    }
   },
 });
 

@@ -1242,13 +1242,13 @@ RSpec.describe PostRevisor do
         expect(post.reload.upload_references.pluck(:upload_id)).to contain_exactly(image2.id, image3.id, image4.id)
       end
 
-      context "with secure media uploads" do
+      context "with secure uploads uploads" do
         let!(:image5) { Fabricate(:secure_upload) }
         before do
           Jobs.run_immediately!
           setup_s3
           SiteSetting.authorized_extensions = "png|jpg|gif|mp4"
-          SiteSetting.secure_media = true
+          SiteSetting.secure_uploads = true
           stub_upload(image5)
         end
 
@@ -1301,6 +1301,20 @@ RSpec.describe PostRevisor do
           )
         }.to change { Draft.where(user: user, draft_key: draft_key).count }.from(1).to(0)
           .and change { DraftSequence.where(user_id: user.id, draft_key: draft_key).first.sequence }.by(1)
+      end
+    end
+
+    context 'when skipping validations' do
+      fab!(:post) { Fabricate(:post, raw: 'aaa', skip_validation: true) }
+
+      it 'can revise multiple times and remove unnecessary revisions' do
+        subject.revise!(admin, { raw: 'bbb' }, skip_validations: true)
+        expect(post.errors).to be_empty
+
+        # Revert to old version which was invalid to destroy previously created
+        # post revision and trigger another post save.
+        subject.revise!(admin, { raw: 'aaa' }, skip_validations: true)
+        expect(post.errors).to be_empty
       end
     end
   end

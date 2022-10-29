@@ -8,12 +8,14 @@ export default class BaseCommunitySectionLink {
     appEvents,
     router,
     siteSettings,
+    inMoreDrawer,
   } = {}) {
     this.router = router;
     this.topicTrackingState = topicTrackingState;
     this.currentUser = currentUser;
     this.appEvents = appEvents;
     this.siteSettings = siteSettings;
+    this.inMoreDrawer = inMoreDrawer;
   }
 
   /**
@@ -31,6 +33,13 @@ export default class BaseCommunitySectionLink {
    */
   get name() {
     this._notImplemented();
+  }
+
+  /**
+   * @returns {boolean} Whether the section link should be displayed. Defaults to true.
+   */
+  get shouldDisplay() {
+    return true;
   }
 
   /**
@@ -85,6 +94,20 @@ export default class BaseCommunitySectionLink {
    * @returns {string} Text for the badge within the link
    */
   get badgeText() {}
+
+  /**
+   * @private
+   */
+  get prefixType() {
+    return "icon";
+  }
+
+  /**
+   * @returns {string} The name of the fontawesome icon to be displayed before the link. Defaults to "link".
+   */
+  get prefixValue() {
+    return "link";
+  }
 
   _notImplemented() {
     throw "not implemented";

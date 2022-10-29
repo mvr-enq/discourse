@@ -142,10 +142,21 @@ module ApplicationHelper
   end
 
   def preload_script_url(url)
-    <<~HTML.html_safe
-      <link rel="preload" href="#{url}" as="script">
-      <script defer src="#{url}"></script>
-    HTML
+    add_resource_preload_list(url, 'script')
+    if GlobalSetting.preload_link_header
+      <<~HTML.html_safe
+        <script defer src="#{url}"></script>
+      HTML
+    else
+      <<~HTML.html_safe
+        <link rel="preload" href="#{url}" as="script">
+        <script defer src="#{url}"></script>
+      HTML
+    end
+  end
+
+  def add_resource_preload_list(resource_url, type)
+    @links_to_preload << %Q(<#{resource_url}>; rel="preload"; as="#{type}") if !@links_to_preload.nil?
   end
 
   def discourse_csrf_tags
@@ -338,17 +349,19 @@ module ApplicationHelper
   end
 
   def render_sitelinks_search_tag
-    json = {
-      '@context' => 'http://schema.org',
-      '@type' => 'WebSite',
-      url: Discourse.base_url,
-      potentialAction: {
-        '@type' => 'SearchAction',
-        target: "#{Discourse.base_url}/search?q={search_term_string}",
-        'query-input' => 'required name=search_term_string',
+    if current_page?('/') || current_page?(Discourse.base_path)
+      json = {
+        '@context' => 'http://schema.org',
+        '@type' => 'WebSite',
+        url: Discourse.base_url,
+        potentialAction: {
+          '@type' => 'SearchAction',
+          target: "#{Discourse.base_url}/search?q={search_term_string}",
+          'query-input' => 'required name=search_term_string',
+        }
       }
-    }
-    content_tag(:script, MultiJson.dump(json).html_safe, type: 'application/ld+json')
+      content_tag(:script, MultiJson.dump(json).html_safe, type: 'application/ld+json')
+    end
   end
 
   def gsub_emoji_to_unicode(str)
@@ -587,7 +600,7 @@ module ApplicationHelper
         stylesheet_manager
       end
 
-    manager.stylesheet_link_tag(name, 'all')
+    manager.stylesheet_link_tag(name, 'all', self.method(:add_resource_preload_list))
   end
 
   def discourse_preload_color_scheme_stylesheets
@@ -603,12 +616,24 @@ module ApplicationHelper
 
   def discourse_color_scheme_stylesheets
     result = +""
-    result << stylesheet_manager.color_scheme_stylesheet_link_tag(scheme_id, 'all')
+    result << stylesheet_manager.color_scheme_stylesheet_link_tag(scheme_id, 'all', self.method(:add_resource_preload_list))
 
     if dark_scheme_id != -1
-      result << stylesheet_manager.color_scheme_stylesheet_link_tag(dark_scheme_id, '(prefers-color-scheme: dark)')
+      result << stylesheet_manager.color_scheme_stylesheet_link_tag(dark_scheme_id, '(prefers-color-scheme: dark)', self.method(:add_resource_preload_list))
     end
 
+    result.html_safe
+  end
+
+  def discourse_theme_color_meta_tags
+    result = +<<~HTML
+      <meta name="theme-color" media="all" content="##{ColorScheme.hex_for_name('header_background', scheme_id)}">
+    HTML
+    if dark_scheme_id != -1
+      result << <<~HTML
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="##{ColorScheme.hex_for_name('header_background', dark_scheme_id)}">
+      HTML
+    end
     result.html_safe
   end
 

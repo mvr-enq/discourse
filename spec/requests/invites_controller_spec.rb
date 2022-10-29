@@ -203,9 +203,9 @@ RSpec.describe InvitesController do
       it 'works' do
         sign_in(user)
 
-        post '/invites.json', params: { email: 'test@example.com', topic_id: topic.id }
+        post '/invites.json', params: { email: 'test@example.com', topic_id: topic.id, invite_to_topic: true }
         expect(response.status).to eq(200)
-        expect(Jobs::InviteEmail.jobs.first['args'].first['invite_to_topic']).to be_falsey
+        expect(Jobs::InviteEmail.jobs.first['args'].first['invite_to_topic']).to be_truthy
       end
 
       it 'fails when topic_id is invalid' do
@@ -631,7 +631,9 @@ RSpec.describe InvitesController do
 
       it 'does not log in the user if there are validation errors' do
         put "/invites/show/#{invite.invite_key}.json", params: { password: 'password' }
+
         expect(response.status).to eq(412)
+        expect(session[:current_user_id]).to eq(nil)
       end
 
       it 'does not log in the user if they were not approved' do

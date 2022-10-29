@@ -79,6 +79,13 @@ module.exports = function (defaults) {
 
     // We need to build tests in prod for theme tests
     tests: true,
+
+    vendorFiles: {
+      // Freedom patch - includes bug fix and async stack support
+      // https://github.com/discourse/backburner.js/commits/discourse-patches
+      backburner:
+        "node_modules/@discourse/backburner.js/dist/named-amd/backburner.js",
+    },
   });
 
   // Patching a private method is not great, but there's no other way for us to tell
@@ -145,15 +152,9 @@ module.exports = function (defaults) {
       "/app/assets/javascripts/discourse/public/assets/scripts/module-shims.js"
   );
 
-  let discoursePluginsTree;
-  if (process.env.EMBER_CLI_PLUGIN_ASSETS !== "0") {
-    discoursePluginsTree = app.project
-      .findAddonByName("discourse-plugins")
-      .generatePluginsTree();
-  } else {
-    // Empty tree - no-op
-    discoursePluginsTree = mergeTrees([]);
-  }
+  const discoursePluginsTree = app.project
+    .findAddonByName("discourse-plugins")
+    .generatePluginsTree();
 
   const terserPlugin = app.project.findAddonByName("ember-cli-terser");
   const applyTerser = (tree) => terserPlugin.postprocessTree("all", tree);

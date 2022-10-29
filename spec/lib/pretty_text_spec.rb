@@ -1125,19 +1125,19 @@ RSpec.describe PrettyText do
       end
     end
 
-    describe "#strip_secure_media" do
+    describe "#strip_secure_uploads" do
       before do
         setup_s3
         SiteSetting.s3_cdn_url = "https://s3.cdn.com"
-        SiteSetting.secure_media = true
+        SiteSetting.secure_uploads = true
         SiteSetting.login_required = true
       end
 
       it "replaces secure video content" do
         html = <<~HTML
           <video width="100%" height="100%" controls="">
-            <source src="#{base_url}/secure-media-uploads/original/1X/some-video.mp4">
-              <a href="#{base_url}/secure-media-uploads/original/1X/some-video.mp4">Video label</a>
+            <source src="#{base_url}/secure-uploads/original/1X/some-video.mp4">
+              <a href="#{base_url}/secure-uploads/original/1X/some-video.mp4">Video label</a>
             </source>
           </video>
         HTML
@@ -1145,58 +1145,58 @@ RSpec.describe PrettyText do
         md = PrettyText.format_for_email(html, post)
 
         expect(md).not_to include('<video')
-        expect(md.to_s).to match(I18n.t("emails.secure_media_placeholder"))
+        expect(md.to_s).to match(I18n.t("emails.secure_uploads_placeholder"))
         expect(md.to_s).not_to match(SiteSetting.Upload.s3_cdn_url)
       end
 
       it "replaces secure audio content" do
         html = <<~HTML
           <audio controls>
-            <source src="#{base_url}/secure-media-uploads/original/1X/some-audio.mp3">
-              <a href="#{base_url}/secure-media-uploads/original/1X/some-audio.mp3">Audio label</a>
+            <source src="#{base_url}/secure-uploads/original/1X/some-audio.mp3">
+              <a href="#{base_url}/secure-uploads/original/1X/some-audio.mp3">Audio label</a>
             </source>
           </audio>
         HTML
 
         md = PrettyText.format_for_email(html, post)
 
-        expect(md).not_to include('<video')
-        expect(md.to_s).to match(I18n.t("emails.secure_media_placeholder"))
+        expect(md).not_to include('<audio')
+        expect(md.to_s).to match(I18n.t("emails.secure_uploads_placeholder"))
         expect(md.to_s).not_to match(SiteSetting.Upload.s3_cdn_url)
       end
 
-      it "replaces secure media within a link with a placeholder, keeping the url in an attribute" do
-        url = "#{Discourse.base_url}\/secure-media-uploads/original/1X/testimage.png"
+      it "replaces secure uploads within a link with a placeholder, keeping the url in an attribute" do
+        url = "#{Discourse.base_url}\/secure-uploads/original/1X/testimage.png"
         html = <<~HTML
-        <a href=\"#{url}\"><img src=\"/secure-media-uploads/original/1X/testimage.png\"></a>
+        <a href=\"#{url}\"><img src=\"/secure-uploads/original/1X/testimage.png\"></a>
         HTML
         md = PrettyText.format_for_email(html, post)
         expect(md).not_to include('<img')
         expect(md).to include("Redacted")
-        expect(md).to include("data-stripped-secure-media=\"#{url}\"")
+        expect(md).to include("data-stripped-secure-upload=\"#{url}\"")
       end
 
       it "does not create nested redactions from double processing because of the view media link" do
-        url = "#{Discourse.base_url}\/secure-media-uploads/original/1X/testimage.png"
+        url = "#{Discourse.base_url}\/secure-uploads/original/1X/testimage.png"
         html = <<~HTML
-        <a href=\"#{url}\"><img src=\"/secure-media-uploads/original/1X/testimage.png\"></a>
+        <a href=\"#{url}\"><img src=\"/secure-uploads/original/1X/testimage.png\"></a>
         HTML
         md = PrettyText.format_for_email(html, post)
         md = PrettyText.format_for_email(md, post)
 
-        expect(md.scan(/stripped-secure-view-media/).length).to eq(1)
+        expect(md.scan(/stripped-secure-view-upload/).length).to eq(1)
         expect(md.scan(/Redacted/).length).to eq(1)
       end
 
       it "replaces secure images with a placeholder, keeping the url in an attribute" do
-        url = "/secure-media-uploads/original/1X/testimage.png"
+        url = "/secure-uploads/original/1X/testimage.png"
         html = <<~HTML
         <img src=\"#{url}\" width=\"20\" height=\"20\">
         HTML
         md = PrettyText.format_for_email(html, post)
         expect(md).not_to include('<img')
         expect(md).to include("Redacted")
-        expect(md).to include("data-stripped-secure-media=\"#{url}\"")
+        expect(md).to include("data-stripped-secure-upload=\"#{url}\"")
         expect(md).to include("data-width=\"20\"")
         expect(md).to include("data-height=\"20\"")
       end
@@ -1714,6 +1714,10 @@ HTML
     expect(PrettyText.cook("a[i]b[/i]c")).to eq('<p>a<span class="bbcode-i">b</span>c</p>')
   end
 
+  it "supports empty inline BBCode" do
+    expect(PrettyText.cook("a[b][/b]c")).to eq('<p>a<span class="bbcode-b"></span>c</p>')
+  end
+
   it "can handle bbcode after a newline" do
     # this is not 100% ideal cause we get an extra p here, but this is pretty rare
     expect(PrettyText.cook("a\n[code]code[/code]")).to eq("<p>a</p>\n<pre><code class=\"lang-auto\">code</code></pre>")
@@ -1767,13 +1771,13 @@ HTML
 
   it "supports img bbcode" do
     cooked = PrettyText.cook "[img]http://www.image/test.png[/img]"
-    html = "<p><img src=\"http://www.image/test.png\" alt=\"\"></p>"
+    html = "<p><img src=\"http://www.image/test.png\" alt=\"\" role=\"presentation\"></p>"
     expect(cooked).to eq(html)
   end
 
   it "provides safety for img bbcode" do
     cooked = PrettyText.cook "[img]http://aaa.com<script>alert(1);</script>[/img]"
-    html = '<p><img src="http://aaa.com&lt;script&gt;alert(1);&lt;/script&gt;" alt=""></p>'
+    html = '<p><img src="http://aaa.com&lt;script&gt;alert(1);&lt;/script&gt;" alt="" role="presentation"></p>'
     expect(cooked).to eq(html)
   end
 
@@ -1858,10 +1862,10 @@ HTML
 
       html = <<~HTML
         <p><img src="http://png.com/my.png" alt="title with | title" width="220" height="100"><br>
-        <img src="http://png.com/my.png" alt=""><br>
-        <img src="http://png.com/my.png" alt="" width="220" height="100"><br>
+        <img src="http://png.com/my.png" alt="" role="presentation"><br>
+        <img src="http://png.com/my.png" alt="" width="220" height="100" role="presentation"><br>
         <img src="http://png.com/my.png" alt="stuff"><br>
-        <img src="http://png.com/my.png" alt="" title="some title" width="110" height="50"></p>
+        <img src="http://png.com/my.png" alt="" title="some title" width="110" height="50" role="presentation"></p>
       HTML
 
       expect(cooked).to eq(html.strip)
@@ -1877,11 +1881,11 @@ HTML
       MD
 
       html = <<~HTML
-        <p><img src="http://png.com/my.png" alt="" width="110" height="50"><br>
-        <img src="http://png.com/my.png" alt="" width="110" height="50"><br>
-        <img src="http://png.com/my.png" alt="" width="110" height="50"><br>
-        <img src="http://png.com/my.png" alt="" width="150" height="68"><br>
-        <img src="http://png.com/my.png" alt="" width="110" height="50"></p>
+        <p><img src="http://png.com/my.png" alt="" width="110" height="50" role="presentation"><br>
+        <img src="http://png.com/my.png" alt="" width="110" height="50" role="presentation"><br>
+        <img src="http://png.com/my.png" alt="" width="110" height="50" role="presentation"><br>
+        <img src="http://png.com/my.png" alt="" width="150" height="68" role="presentation"><br>
+        <img src="http://png.com/my.png" alt="" width="110" height="50" role="presentation"></p>
       HTML
 
       expect(cooked).to eq(html.strip)

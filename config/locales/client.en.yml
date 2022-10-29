@@ -254,8 +254,10 @@ en:
     ok_value: "OK"
     cancel_value: "Cancel"
     submit: "Submit"
+    delete: "Delete"
     generic_error: "Sorry, an error has occurred."
     generic_error_with_reason: "An error occurred: %{error}"
+    multiple_errors: "Multiple errors occurred: %{errors}"
     sign_up: "Sign Up"
     log_in: "Log In"
     age: "Age"
@@ -719,6 +721,8 @@ en:
         reset_to_default: "Reset to default"
       group:
         all: "all groups"
+      sort:
+        label: "Sort by %{criteria}"
 
     group_histories:
       actions:
@@ -885,6 +889,7 @@ en:
         group_type: "Group type"
         is_group_user: "Member"
         is_group_owner: "Owner"
+        search_results: "Search results will appear below."
       title:
         one: "Group"
         other: "Groups"
@@ -919,6 +924,7 @@ en:
         no_filter_matches: "No members match that search."
       topics: "Topics"
       posts: "Posts"
+      aria_post_number: "%{title} - post #%{postNumber}"
       mentions: "Mentions"
       messages: "Messages"
       notification_level: "Default notification level for group messages"
@@ -1037,6 +1043,7 @@ en:
     user_fields:
       none: "(select an option)"
       required: 'Please enter a value for "%{name}"'
+      same_as_password: 'Your password should not be repeated in other fields.'
 
     user:
       said: "%{username}:"
@@ -1139,6 +1146,9 @@ en:
         You will be notified in this panel about activity directly relevant to you, including replies to your topics and posts, when someone <b>@mentions</b> you or quotes you, and replies to topics you are watching. Notifications will also be sent to your email when you haven’t logged in for a while.
         <br><br>
         Look for the %{icon} to decide which specific topics, categories and tags you want to be notified about. For more, see your <a href='%{preferencesUrl}'>notification preferences</a>.
+      no_other_notifications_title: "You don’t have any other notifications yet"
+      no_other_notifications_body: >
+        You will be notified in this panel about other kinds of activity that may be relevant to you - for example, when someone links to or edits one of your posts.
       no_notifications_page_title: "You don’t have any notifications yet"
       no_notifications_page_body: >
         You will be notified about activity directly relevant to you, including replies to your topics and posts, when someone <b>@mentions</b> you or quotes you, and replies to topics you are watching. Notifications will also be sent to your email when you haven’t logged in for a while.
@@ -1151,6 +1161,7 @@ en:
         not_first_time: "Not your first time?"
         skip_link: "Skip these tips"
         read_later: "I'll read it later."
+      reset_seen_popups: "Show onboarding tips again"
       theme_default_on_all_devices: "Make this the default theme on all my devices"
       color_scheme_default_on_all_devices: "Set default color scheme(s) on all my devices"
       color_scheme: "Color Scheme"
@@ -1170,12 +1181,16 @@ en:
       enable_quoting: "Enable quote reply for highlighted text"
       enable_defer: "Enable defer to mark topics unread"
       experimental_sidebar:
-        enable: "Enable experimental sidebar"
+        enable: "Enable sidebar"
         options: "Options"
         categories_section: "Categories Section"
         categories_section_instruction: "Selected categories will be displayed under Sidebar's categories section."
         tags_section: "Tags Section"
         tags_section_instruction: "Selected tags will be displayed under Sidebar's tags section."
+        navigation_section: "Navigation"
+        list_destination_instruction: "When I click a topic list link in the sidebar with new or unread topics, take me to"
+        list_destination_default: "Default"
+        list_destination_unread_new: "New/Unread"
       change: "change"
       featured_topic: "Featured Topic"
       moderator: "%{user} is a moderator"
@@ -1275,6 +1290,7 @@ en:
         move_to_archive: "Archive"
         failed_to_move: "Failed to move selected messages (perhaps your network is down)"
         tags: "Tags"
+        all_tags: "All Tags"
         warnings: "Official Warnings"
         read_more_in_group: "Want to read more? Browse other messages in %{groupLink}."
         read_more: "Want to read more? Browse other messages in <a href='%{basePath}/u/%{username}/messages'>personal messages</a>."
@@ -1381,7 +1397,7 @@ en:
         edit_title: "Edit Authenticator"
         edit_description: "Authenticator Name"
         enable_security_key_description: |
-          When you have your <a href="https://www.google.com/search?q=hardware+security+key" target="_blank">hardware security key</a> prepared, press the Register button below.
+          When you have your <a href="https://www.google.com/search?q=hardware+security+key" target="_blank">hardware security key</a> or compatible mobile device prepared, press the Register button below.
         totp:
           title: "Token-Based Authenticators"
           add: "Add Authenticator"
@@ -1389,14 +1405,16 @@ en:
           name_and_code_required_error: "You must provide a name and the code from your authenticator app."
         security_key:
           register: "Register"
-          title: "Security Keys"
-          add: "Add Security Key"
+          title: "Physical Security Keys"
+          add: "Add Physical Security Key"
           default_name: "Main Security Key"
+          iphone_default_name: "iPhone"
+          android_default_name: "Android"
           not_allowed_error: "The security key registration process either timed out or was cancelled."
           already_added_error: "You have already registered this security key. You don’t have to register it again."
-          edit: "Edit Security Key"
+          edit: "Edit Physical Security Key"
           save: "Save"
-          edit_description: "Security Key Name"
+          edit_description: "Physical Security Key Name"
           name_required_error: "You must provide a name for your security key."
 
       change_about:
@@ -1787,6 +1805,9 @@ en:
         title: "Flair"
         none: "(none)"
         instructions: "icon displayed next to your profile picture"
+      status:
+        title: "Custom Status"
+        not_set: "Not set"
       primary_group:
         title: "Primary Group"
         none: "(none)"
@@ -1805,6 +1826,18 @@ en:
       set_custom_status: "Set custom status"
       what_are_you_doing: "What are you doing?"
       remove_status: "Remove status"
+
+    popup:
+      primary: "Got it!"
+      secondary: "don't show me these tips"
+
+      first_notification:
+        title: "Your first notification!"
+        content: "Notifications are used to keep you up to date with what is happening in the community."
+
+      topic_timeline:
+        title: "Topic timeline"
+        content: "Scroll quickly through a post using the topic timeline."
 
     loading: "Loading..."
     errors:
@@ -1838,6 +1871,8 @@ en:
       enabled: "This site is in read only mode. Please continue to browse, but replying, likes, and other actions are disabled for now."
       login_disabled: "Login is disabled while the site is in read only mode."
       logout_disabled: "Logout is disabled while the site is in read only mode."
+    staff_writes_only_mode:
+      enabled: "This site is in staff only mode. Please continue to browse, but replying, likes, and other actions are limited to staff members only."
     too_few_topics_and_posts_notice_MF: >-
       Let's <a href="https://blog.discourse.org/2014/08/building-a-discourse-community/">start the discussion!</a>
       There {currentTopics, plural, one {is <strong>#</strong> topic} other {are <strong>#</strong> topics}} and
@@ -1886,7 +1921,7 @@ en:
       hide_forever: "no thanks"
       hidden_for_session: "OK, we'll ask you tomorrow. You can always use 'Log In' to create an account, too."
       intro: "Hello! Looks like you’re enjoying the discussion, but you haven’t signed up for an account yet."
-      value_prop: "Tired of scrolling through the same posts? when you create an account you’ll always come back to where you left off. With an account you can also be notified of new replies, save bookmarks, and use likes to thank others. We can all work together to make this community great. :heart:"
+      value_prop: "Tired of scrolling through the same posts? When you create an account you’ll always come back to where you left off. With an account you can also be notified of new replies, save bookmarks, and use likes to thank others. We can all work together to make this community great. :heart:"
 
     summary:
       enabled_description: "You're viewing a summary of this topic: the most interesting posts as determined by the community."
@@ -1915,6 +1950,9 @@ en:
       leave_message: "Do you really want to leave this message?"
       remove_allowed_user: "Do you really want to remove %{name} from this message?"
       remove_allowed_group: "Do you really want to remove %{name} from this message?"
+      leave: "Leave"
+      remove_group: "Remove group"
+      remove_user: "Remove user"
 
     email: "Email"
     username: "Username"
@@ -1976,7 +2014,7 @@ en:
       second_factor_backup_title: "Two-Factor Backup"
       second_factor_backup_description: "Please enter one of your backup codes:"
       second_factor: "Log in using Authenticator app"
-      security_key_description: "When you have your physical security key prepared press the Authenticate with Security Key button below."
+      security_key_description: "When you have your physical security key or compatible mobile device prepared press the Authenticate with Security Key button below."
       security_key_alternative: "Try another way"
       security_key_authenticate: "Authenticate with Security Key"
       security_key_not_allowed_error: "The security key authentication process either timed out or was cancelled."
@@ -2164,6 +2202,9 @@ en:
       similar_topics: "Your topic is similar to..."
       drafts_offline: "drafts offline"
       edit_conflict: "edit conflict"
+      esc: "esc"
+      esc_label: "Click or press Esc to dismiss"
+      ok_proceed: "Ok, proceed"
 
       group_mentioned_limit:
         one: "<b>Warning!</b> You mentioned <a href='%{group_link}'>%{group}</a>, however this group has more members than the administrator configured mention limit of %{count} user. Nobody will be notified."
@@ -2271,6 +2312,9 @@ en:
         body: "Right now this message is only being sent to yourself!"
       slow_mode:
         error: "This topic is in slow mode. You already posted recently; you can post again in %{timeLeft}."
+      user_not_seen_in_a_while:
+        single: "The person you are messaging, <b>%{usernames}</b>, hasn’t been seen here in a very long time – %{time_ago}. They may not receive your message. You may wish to seek out alternate methods of contacting %{usernames}."
+        multiple: "The following people you are messaging: <b>%{usernames}</b>, haven’t been seen here in a very long time – %{time_ago}. They may not receive your message. You may wish to seek out alternate methods of contacting them."
 
       admin_options_title: "Optional staff settings for this topic"
 
@@ -2567,17 +2611,53 @@ en:
     view_all: "view all %{tab}"
     user_menu:
       generic_no_items: "There are no items in this list."
-      sr_menu_tabs: "Menu tabs"
+      sr_menu_tabs: "User menu tabs"
       view_all_notifications: "view all notifications"
       view_all_bookmarks: "view all bookmarks"
       view_all_messages: "view all personal messages"
+      tabs:
+        all_notifications: "All notifications"
+        replies: "Replies"
+        replies_with_unread:
+          one: "Replies - %{count} unread reply"
+          other: "Replies - %{count} unread replies"
+        mentions: "Mentions"
+        mentions_with_unread:
+          one: "Mentions - %{count} unread mention"
+          other: "Mentions - %{count} unread mentions"
+        likes: "Likes"
+        likes_with_unread:
+          one: "Likes - %{count} unread like"
+          other: "Likes - %{count} unread likes"
+        watching: "Watched topics"
+        watching_with_unread:
+          one: "Watched topics - %{count} unread watched topic"
+          other: "Watched topics - %{count} unread watched topics"
+        messages: "Personal messages"
+        messages_with_unread:
+          one: "Personal messages - %{count} unread message"
+          other: "Personal messages - %{count} unread messages"
+        bookmarks: "Bookmarks"
+        bookmarks_with_unread:
+          one: "Bookmarks - %{count} unread bookmark"
+          other: "Bookmarks - %{count} unread bookmarks"
+        review_queue: "Review queue"
+        review_queue_with_unread:
+          one: "Review queue - %{count} item needs review"
+          other: "Review queue - %{count} items need review"
+        other_notifications: "Other notifications"
+        other_notifications_with_unread:
+          one: "Other notifications - %{count} unread notification"
+          other: "Other notifications - %{count} unread notifications"
+        profile: "Profile"
       reviewable:
         view_all: "view all review items"
         queue: "Queue"
         deleted_user: "(deleted user)"
+        deleted_post: "(deleted post)"
         post_number_with_topic_title: "post #%{post_number} - %{title}"
         new_post_in_topic: "new post in %{title}"
-        suspicious_user: "suspicious user %{username}"
+        user_requires_approval: "%{username} requires approval"
         default_item: "reviewable item #%{reviewable_id}"
 
     topics:
@@ -2625,7 +2705,7 @@ en:
         remove_tags: "Remove All Tags"
         confirm_remove_tags:
           one: "All tags will be removed from this topic. Are you sure?"
-          other: "All tags will be removed from <b>%{count}</b> topics. Are you sure?"
+          other: "All tags will be removed from %{count} topics. Are you sure?"
         progress:
           one: "Progress: <strong>%{count}</strong> topic"
           other: "Progress: <strong>%{count}</strong> topics"
@@ -3140,6 +3220,7 @@ en:
       gap:
         one: "view %{count} hidden reply"
         other: "view %{count} hidden replies"
+      sr_reply_to: "Reply to post #%{post_number} by @%{username}"
 
       notice:
         new_user: "This is the first time %{user} has posted — let’s welcome them to our community!"
@@ -3289,12 +3370,12 @@ en:
       delete:
         confirm:
           one: "Are you sure you want to delete that post?"
-          other: "Are you sure you want to delete those %{count} posts?"
+          other: "Are you sure you want to delete these %{count} posts?"
 
       merge:
         confirm:
-          one: "Are you sure you want to merge those posts?"
-          other: "Are you sure you want to merge those %{count} posts?"
+          one: "Are you sure you want to merge these posts?"
+          other: "Are you sure you want to merge these %{count} posts?"
 
       revisions:
         controls:
@@ -3375,6 +3456,7 @@ en:
       all: "All categories"
       choose: "category&hellip;"
       edit: "Edit"
+      edit_title: "Edit this category"
       edit_dialog_title: "Edit: %{categoryName}"
       view: "View Topics in Category"
       back: "Back to category"
@@ -3406,6 +3488,7 @@ en:
       name: "Category Name"
       description: "Description"
       logo: "Category Logo Image"
+      logo_dark: "Dark Mode Category Logo Image"
       background_image: "Category Background Image"
       badge_colors: "Badge colors"
       background_color: "Background color"
@@ -3731,6 +3814,8 @@ en:
 
     browser_update: 'Unfortunately, <a href="https://www.discourse.org/faq/#browser">your browser is unsupported</a>. Please <a href="https://browsehappy.com">switch to a supported browser</a> to view rich content, log in and reply.'
 
+    safari_13_warning: This site will soon remove support for iOS and Safari versions 13 and below. A simplified read-only version will remain available. (<a href="https://meta.discourse.org/t/224747">more information</a>)
+
     permission_types:
       full: "Create / Reply / See"
       create_post: "Reply / See"
@@ -3886,7 +3971,7 @@ en:
       google: "Google Calendar"
       ics: "ICS"
     tagging:
-      all_tags: "All Tags"
+      all_tags: "All tags"
       other_tags: "Other Tags"
       selector_all_tags: "all tags"
       selector_no_tags: "no tags"
@@ -3951,7 +4036,6 @@ en:
       tag_list_joiner: ", "
       delete_unused: "Delete Unused Tags"
       delete_unused_description: "Delete all tags which are not attached to any topics or personal messages"
-      cancel_delete_unused: "Cancel"
       filters:
         without_category: "%{filter} %{tag} topics"
         with_category: "%{filter} %{tag} topics in %{category}"
@@ -4094,8 +4178,12 @@ en:
         one: "%{count} new"
         other: "%{count} new"
       toggle_section: "toggle section"
-      more: "More..."
+      more: "More"
+      all_categories: "All categories"
+      all_tags: "All tags"
       sections:
+        about:
+          header_link_text: "About"
         messages:
           header_link_text: "Messages"
           header_action_title: "create a personal message"
@@ -4112,11 +4200,13 @@ en:
           click_to_get_started: "Click here to get started."
           header_link_text: "Tags"
           header_action_title: "edit your sidebar tags"
+          configure_defaults: "Configure defaults"
         categories:
           none: "You have not added any categories."
           click_to_get_started: "Click here to get started."
           header_link_text: "Categories"
           header_action_title: "edit your sidebar categories"
+          configure_defaults: "Configure defaults"
         community:
           header_link_text: "Community"
           header_action_title: "create a new topic"
@@ -4147,10 +4237,14 @@ en:
               draft_count:
                 one: "%{count} draft"
                 other: "%{count} drafts"
+            review:
+              content: "Review"
+              title: "review"
+              pending_count: "%{count} pending"
 
     welcome_topic_banner:
       title: "Create your Welcome Topic"
-      description: 'Your welcome topic is the first thing new arrivals will read. Think of it as your one paragraph "elevator pitch" or "mission statement"'
+      description: 'Your welcome topic is the first thing new members will read. Think of it as your “elevator pitch” or “mission statement.” Let everyone know who this community is for, what they can expect to find here, and what you’d like them to do first.'
       button_title: "Start Editing"
 
     until: "Until:"
@@ -4763,6 +4857,7 @@ en:
           has_overwritten_history: "Current theme version no longer exists because the Git history has been overwritten by a force push."
           add: "Add"
           theme_settings: "Theme Settings"
+          overriden_settings_explanation: "Overridden settings are marked with a dot and have a highlighted color. To reset these settings to the default value, press the reset button next to them."
           no_settings: "This theme has no settings."
           theme_translations: "Theme Translations"
           empty: "No items"
@@ -5289,6 +5384,7 @@ en:
         suspended: "Suspended?"
         staged: "Staged?"
         show_admin_profile: "Admin"
+        manage_user: "Manage user"
         show_public_profile: "Show Public Profile"
         impersonate: "Impersonate"
         action_logs: "Action Logs"
@@ -5582,6 +5678,7 @@ en:
           search: "Search"
           groups: "Groups"
           dashboard: "Dashboard"
+          sidebar: "Sidebar"
         secret_list:
           invalid_input: "Input fields cannot be empty or contain vertical bar character."
         default_categories:
@@ -5699,7 +5796,7 @@ en:
       embedding:
         get_started: "If you'd like to embed Discourse on another website, begin by adding its host."
         confirm_delete: "Are you sure you want to delete that host?"
-        sample: "Paste the following HTML code into your site to create and embed discourse topics. Replace <b>REPLACE_ME</b> with the canonical URL of the page you are embedding it on."
+        sample: "Paste the following HTML code into your site to create and embed Discourse topics. Replace <b>REPLACE_ME</b> with the canonical URL of the page you are embedding it on."
         title: "Embedding"
         host: "Allowed Hosts"
         class_name: "Class Name"

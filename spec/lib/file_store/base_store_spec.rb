@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe FileStore::BaseStore do
-  fab!(:upload) { Fabricate(:upload, id: 9999, sha1: Digest::SHA1.hexdigest('9999')) }
+  fab!(:upload) do
+    Upload.delete(9999) # In case of any collisions
+    Fabricate(:upload, id: 9999, sha1: Digest::SHA1.hexdigest('9999'))
+  end
 
   describe '#get_path_for_upload' do
     def expect_correct_path(expected_path)
@@ -173,9 +176,9 @@ RSpec.describe FileStore::BaseStore do
       expect(file.class).to eq(File)
     end
 
-    it "should return the file when secure media are enabled" do
+    it "should return the file when secure uploads are enabled" do
       SiteSetting.login_required = true
-      SiteSetting.secure_media = true
+      SiteSetting.secure_uploads = true
 
       stub_request(:head, "https://s3-upload-bucket.s3.#{SiteSetting.s3_region}.amazonaws.com/")
       signed_url = Discourse.store.signed_url_for_path(upload_s3.url)

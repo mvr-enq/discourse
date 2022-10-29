@@ -182,6 +182,7 @@ et:
     ok_value: "OK"
     cancel_value: "Tühista"
     submit: "Saada"
+    delete: "Kustuta"
     generic_error: "Vabandust, tekkis viga."
     generic_error_with_reason: "Tekkis viga: %{error}"
     sign_up: "Liitu"
@@ -787,6 +788,8 @@ et:
       enable_quoting: "Luba esiletõstetud tekstile tsitaadiga vastata"
       experimental_sidebar:
         options: "Võimalused"
+        navigation_section: "Navigatsioon"
+        list_destination_default: "Vaikimisi"
       change: "muuda"
       featured_topic: "Esile tõstetud teema"
       moderator: "%{user} on moderaator"
@@ -873,6 +876,7 @@ et:
         move_to_archive: "Arhiiv"
         failed_to_move: "Valitud sõnumite teisaldamine ebaõnnestus (võrguühendus võib olla häiritud)"
         tags: "Sildid"
+        all_tags: "Kõik sildid"
       preferences_nav:
         account: "Konto"
         security: "Turve"
@@ -913,6 +917,8 @@ et:
         edit: "Muuda"
         security_key:
           register: "Registreeru"
+          iphone_default_name: "iPhone"
+          android_default_name: "Android"
           save: "Salvesta"
       change_about:
         title: "Muuda minu andmeid"
@@ -1224,6 +1230,8 @@ et:
       title: "Sõnum"
       remove_allowed_user: "Kas soovid tõesti %{name} sellest sõnumist eemaldada?"
       remove_allowed_group: "Kas soovid tõesti %{name} sellest sõnumist eemaldada?"
+      leave: "Lahku"
+      remove_user: "Eemalda kasutaja"
     email: "Meiliaadress"
     username: "Kasutajanimi"
     last_seen: "Vaadatud"
@@ -1549,6 +1557,13 @@ et:
     not_logged_in_user: "kasutajaleht koos toimingute ja eelistuste kokkuvõttega"
     current_user: "mine oma kasutajalehele"
     view_all: "vaata kõiki %{tab}"
+    user_menu:
+      tabs:
+        replies: "Vastused"
+        mentions: "Mainimisi"
+        likes: "Meeldimisi antud"
+        bookmarks: "Järjehoidjat"
+        profile: "Profiil"
     topics:
       new_messages_marker: "viimane visiit"
       bulk:
@@ -2029,10 +2044,6 @@ et:
         confirm:
           one: "Oled sa kindel, et soovid seda postitust kustutada?"
           other: "Oled sa kindel, et soovid neid %{count} postitust kustutada?"
-      merge:
-        confirm:
-          one: "Oled kindel, et soovid need postitused ühendada?"
-          other: "Oled kindel, et soovid need %{count} postitust ühendada?"
       revisions:
         controls:
           first: "Esimene redaktsioon"
@@ -2453,7 +2464,6 @@ et:
     download_calendar:
       download: "Lae alla"
     tagging:
-      all_tags: "Kõik sildid"
       other_tags: "Muud sildid"
       selector_all_tags: "kõik sildid"
       selector_no_tags: "sildid puuduvad"
@@ -2468,7 +2478,6 @@ et:
       sort_by_name: "nimi"
       manage_groups: "Halda siltide gruppe"
       manage_groups_description: "Määra siltide organiseerimiseks grupid"
-      cancel_delete_unused: "Tühista"
       filters:
         without_category: "%{filter} %{tag} teemat"
         with_category: "%{filter} %{tag} teemat %{category} foorumis"
@@ -2537,8 +2546,11 @@ et:
       new_count:
         one: "%{count} uus"
         other: "%{count} uut"
-      more: "Veel..."
+      more: "Veel"
+      all_categories: "Kõik foorumid"
       sections:
+        about:
+          header_link_text: "Teave"
         messages:
           header_link_text: "Sõnumid"
           links:
@@ -2573,6 +2585,9 @@ et:
               content: "Kasutajad"
             my_posts:
               content: "Minu"
+            review:
+              content: "Vaata üle"
+              title: "vaata üle"
   admin_js:
     type_to_filter: "filtreerimiseks trüki..."
     admin:

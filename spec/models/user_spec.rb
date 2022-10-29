@@ -20,6 +20,90 @@ RSpec.describe User do
     end
   end
 
+  describe 'Callbacks' do
+    describe 'default sidebar section links' do
+      fab!(:category) { Fabricate(:category) }
+
+      fab!(:secured_category) do |category|
+        category = Fabricate(:category)
+        category.permissions = { "staff" => :full }
+        category.save!
+        category
+      end
+
+      fab!(:tag) { Fabricate(:tag) }
+      fab!(:hidden_tag) { Fabricate(:tag) }
+      fab!(:staff_tag_group) { Fabricate(:tag_group, permissions: { "staff" => 1 }, tag_names: [hidden_tag.name]) }
+
+      before do
+        SiteSetting.enable_experimental_sidebar_hamburger = true
+        SiteSetting.tagging_enabled = true
+        SiteSetting.default_sidebar_categories = "#{category.id}|#{secured_category.id}"
+        SiteSetting.default_sidebar_tags = "#{tag.name}|#{hidden_tag.name}"
+      end
+
+      it 'creates the right sidebar section link records for categories and tags that a user can see' do
+        user = Fabricate(:user)
+
+        expect(SidebarSectionLink.where(linkable_type: 'Category', user_id: user.id).pluck(:linkable_id)).to contain_exactly(
+          category.id
+        )
+
+        expect(SidebarSectionLink.where(linkable_type: 'Tag', user_id: user.id).pluck(:linkable_id)).to contain_exactly(
+          tag.id
+        )
+
+        user = Fabricate(:admin)
+
+        expect(SidebarSectionLink.where(linkable_type: 'Category', user_id: user.id).pluck(:linkable_id)).to contain_exactly(
+          category.id,
+          secured_category.id
+        )
+
+        expect(SidebarSectionLink.where(linkable_type: 'Tag', user_id: user.id).pluck(:linkable_id)).to contain_exactly(
+          tag.id,
+          hidden_tag.id
+        )
+      end
+
+      it 'should not create any sidebar section link records when experimental sidebar is disabled' do
+        SiteSetting.enable_experimental_sidebar_hamburger = false
+
+        user = Fabricate(:user)
+
+        expect(SidebarSectionLink.exists?(user_id: user.id)).to eq(false)
+      end
+
+      it 'should not create any sidebar section link records for staged users' do
+        user = Fabricate(:user, staged: true)
+
+        expect(SidebarSectionLink.exists?).to eq(false)
+      end
+
+      it 'should create sidebar section link records when user has been unstaged' do
+        user = Fabricate(:user, staged: true)
+        user.unstage!
+
+        expect(SidebarSectionLink.exists?(user: user)).to eq(true)
+      end
+
+      it 'should not create any sidebar section link records for non human users' do
+        user = Fabricate(:user, id: -Time.now.to_i)
+
+        expect(SidebarSectionLink.exists?).to eq(false)
+      end
+
+      it 'should not create any tag sidebar section link records when tagging is disabled' do
+        SiteSetting.tagging_enabled = false
+
+        user = Fabricate(:user)
+
+        expect(SidebarSectionLink.exists?(linkable_type: 'Category', user_id: user.id)).to eq(true)
+        expect(SidebarSectionLink.exists?(linkable_type: 'Tag', user_id: user.id)).to eq(false)
+      end
+    end
+  end
+
   describe 'Validations' do
     describe '#username' do
       it { is_expected.to validate_presence_of :username }
@@ -1601,6 +1685,8 @@ RSpec.describe User do
     fab!(:unactivated_old_with_post) { Fabricate(:user, active: false, created_at: 1.month.ago) }
 
     before do
+      Group.refresh_automatic_groups!
+
       PostCreator.new(Discourse.system_user,
                       title: "Welcome to our Discourse",
                       raw: "This is a welcome message",
@@ -1990,7 +2076,7 @@ RSpec.describe User do
 
   describe '.human_users' do
     it 'should only return users with a positive primary key' do
-      Fabricate(:user, id: -1979)
+      Fabricate(:bot)
       user = Fabricate(:user)
 
       expect(User.human_users).to eq([user])
@@ -2602,35 +2688,44 @@ RSpec.describe User do
   end
 
   describe 'Granting admin or moderator status' do
-    fab!(:reviewable_user) { Fabricate(:reviewable_user) }
+    context 'when granting admin status' do
+      context 'when there is a reviewable' do
+        fab!(:user) { Fabricate(:reviewable_user) }
 
-    it 'approves the associated reviewable when granting admin status' do
-      reviewable_user.target.grant_admin!
+        context 'when the user isn’t approved yet' do
+          it 'approves the associated reviewable' do
+            expect { user.target.grant_admin! }.to change { user.reload.dup }.to be_approved
+          end
+        end
 
-      expect(reviewable_user.reload.status).to eq Reviewable.statuses[:approved]
+        context "when the user is already approved" do
+          before do
+            user.perform(Discourse.system_user, :approve_user)
+          end
+
+          it 'does nothing' do
+            expect { user.target.grant_admin! }.not_to change { user.reload.approved? }
+          end
+        end
+      end
+
+      context 'when there is no reviewable' do
+        let(:user) { Fabricate(:user, approved: false) }
+
+        it 'approves the user' do
+          expect { user.grant_admin! }.to change { user.reload.approved }.to true
+        end
+      end
     end
 
-    it 'does nothing when the user is already approved' do
-      reviewable_user = Fabricate(:reviewable_user)
-      reviewable_user.perform(Discourse.system_user, :approve_user)
+    context 'when granting moderator status' do
+      context 'when there is a reviewable' do
+        let(:user) { Fabricate(:reviewable_user) }
 
-      reviewable_user.target.grant_admin!
-
-      expect(reviewable_user.reload.status).to eq Reviewable.statuses[:approved]
-    end
-
-    it 'approves the associated reviewable when granting moderator status' do
-      reviewable_user.target.grant_moderation!
-
-      expect(reviewable_user.reload.status).to eq Reviewable.statuses[:approved]
-    end
-
-    it 'approves the user if there is no reviewable' do
-      user = Fabricate(:user, approved: false)
-
-      user.grant_admin!
-
-      expect(user.approved).to eq(true)
+        it 'approves the associated reviewable' do
+          expect { user.target.grant_moderation! }.to change { user.reload.dup }.to be_approved
+        end
+      end
     end
   end
 
@@ -2953,6 +3048,41 @@ RSpec.describe User do
         user_ids: [user.id],
         data: { unseen_reviewable_count: 0 }
       )
+    end
+  end
+
+  describe "#bump_last_seen_notification!" do
+    it "doesn't error if there are no notifications" do
+      Notification.destroy_all
+      expect(user.bump_last_seen_notification!).to eq(false)
+      expect(user.reload.seen_notification_id).to eq(0)
+    end
+
+    it "updates seen_notification_id to the last notification that the user can see" do
+      last_notification = Fabricate(:notification, user: user)
+      deleted_notification = Fabricate(:notification, user: user)
+      deleted_notification.topic.trash!
+      someone_else_notification = Fabricate(:notification, user: Fabricate(:user))
+
+      expect(user.bump_last_seen_notification!).to eq(true)
+      expect(user.reload.seen_notification_id).to eq(last_notification.id)
+    end
+  end
+
+  describe '#visible_sidebar_tags' do
+    fab!(:user) { Fabricate(:user) }
+    fab!(:tag) { Fabricate(:tag) }
+    fab!(:hidden_tag) { Fabricate(:tag, name: "secret") }
+    fab!(:staff_tag_group) { Fabricate(:tag_group, permissions: { "staff" => 1 }, tag_names: ["secret"]) }
+    fab!(:tag_sidebar_section_link) { Fabricate(:tag_sidebar_section_link, user: user, linkable: tag) }
+    fab!(:tag_sidebar_section_link_2) { Fabricate(:tag_sidebar_section_link, user: user, linkable: hidden_tag) }
+
+    it 'should only return tag sidebar section link records of tags that the user is allowed to see' do
+      expect(user.visible_sidebar_tags).to contain_exactly(tag)
+
+      user.update!(admin: true)
+
+      expect(user.visible_sidebar_tags).to contain_exactly(tag, hidden_tag)
     end
   end
 end

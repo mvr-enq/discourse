@@ -1,6 +1,6 @@
 import Controller, { inject as controller } from "@ember/controller";
-import EmberObject, { computed, set } from "@ember/object";
-import { and, equal, gt, not, or } from "@ember/object/computed";
+import EmberObject, { action, computed, set } from "@ember/object";
+import { and, equal, gt, not, or, readOnly } from "@ember/object/computed";
 import CanCheckEmails from "discourse/mixins/can-check-emails";
 import User from "discourse/models/user";
 import I18n from "I18n";
@@ -109,10 +109,14 @@ export default Controller.extend(CanCheckEmails, {
     return viewingSelf;
   },
 
-  @discourseComputed("viewingSelf", "currentUser.admin")
+  @discourseComputed(
+    "viewingSelf",
+    "currentUser.admin",
+    "currentUser.can_send_private_messages"
+  )
   showPrivateMessages(viewingSelf, isAdmin) {
     return (
-      this.siteSettings.enable_personal_messages && (viewingSelf || isAdmin)
+      this.currentUser?.can_send_private_messages && (viewingSelf || isAdmin)
     );
   },
 
@@ -164,6 +168,8 @@ export default Controller.extend(CanCheckEmails, {
     }
   },
 
+  currentParentRoute: readOnly("router.currentRoute.parent.name"),
+
   userNotificationLevel: computed(
     "currentUser.ignored_ids",
     "model.ignored",
@@ -184,6 +190,26 @@ export default Controller.extend(CanCheckEmails, {
     }
   ),
 
+  get displayTopLevelAdminButton() {
+    if (!this.currentUser?.staff) {
+      return false;
+    }
+    if (this.currentUser?.redesigned_user_page_nav_enabled) {
+      return this.site.desktopView;
+    } else {
+      return true;
+    }
+  },
+
+  @action
+  showSuspensions(event) {
+    event?.preventDefault();
+    this.adminTools.showActionLogs(this, {
+      target_user: this.get("model.username"),
+      action_name: "suspend_user",
+    });
+  },
+
   actions: {
     collapseProfile() {
       this.set("forceExpand", false);
@@ -191,13 +217,6 @@ export default Controller.extend(CanCheckEmails, {
 
     expandProfile() {
       this.set("forceExpand", true);
-    },
-
-    showSuspensions() {
-      this.adminTools.showActionLogs(this, {
-        target_user: this.get("model.username"),
-        action_name: "suspend_user",
-      });
     },
 
     adminDelete() {

@@ -169,6 +169,7 @@ sw:
     ok_value: "Vema"
     cancel_value: "Ghairi"
     submit: "Wasilisha"
+    delete: "Futa"
     generic_error: "Samahani, hitilafu imetokea."
     generic_error_with_reason: "Hitilafu imetokea: %{error}"
     sign_up: "Jiunge"
@@ -643,6 +644,8 @@ sw:
       enable_quoting: "Ruhusu jibu nukulu kwenye neno lenye angaza"
       experimental_sidebar:
         options: "Chaguo"
+        navigation_section: "Abiri"
+        list_destination_default: "Halisi"
       change: "badilisha"
       moderator: "%{mtumiaji} ni msimamizi"
       admin: "%{mtumiaji} ni kiongozi"
@@ -721,6 +724,7 @@ sw:
         move_to_archive: "Hifadhi"
         failed_to_move: "Uhamishaji wa ujumbe uliochaguliwa umeshindikana (laba hauna mtandao wa intaneti uko chini)"
         tags: "Lebo"
+        all_tags: "Lebo Zote"
       preferences_nav:
         account: "Akaunti"
         security: "Ulinzi"
@@ -1056,6 +1060,8 @@ sw:
       leave_message: "Je, ni unataka kuiacha huu ujumbe?"
       remove_allowed_user: "Je, unataka kuondoa %{name} kutoka kwenye huu ujumbe?"
       remove_allowed_group: "Je, unataka kuondoa %{name} kutoka kwenye huu ujumbe?"
+      leave: "Ondoka"
+      remove_user: "Ondoa mtumiaji"
     email: "Barua pepe"
     username: "Jina la mtumiaji"
     last_seen: "Imetazamwa"
@@ -1425,6 +1431,13 @@ sw:
     go_back: "rudi nyuma"
     not_logged_in_user: "karatasi ya kwanza yenye muhtasari wa shughuli na mapendekezo ya sasa"
     current_user: "nenda kwenye ukurasa wako"
+    user_menu:
+      tabs:
+        replies: "Majibu"
+        mentions: "Kutajwa"
+        likes: "Upendo Uliotolewa"
+        bookmarks: "Mialamisho"
+        profile: "Maelezo mafupi"
     topics:
       new_messages_marker: "Mara ya mwisho imetembelewa"
       bulk:
@@ -2177,7 +2190,6 @@ sw:
     download_calendar:
       download: "Pakua"
     tagging:
-      all_tags: "Lebo Zote"
       other_tags: "Lebo Zingine"
       selector_all_tags: "lebo zote"
       selector_no_tags: "hakuna lebo"
@@ -2193,7 +2205,6 @@ sw:
       sort_by_name: "jina"
       manage_groups: "Dhibiti makundi ya lebo"
       manage_groups_description: "Fasili makundi kwa ajili ya kurakibisha lebo"
-      cancel_delete_unused: "Ghairi"
       filters:
         without_category: "mada %{filter}%{tag}"
         with_category: "mada%{filter} %{tag} za %{category}"
@@ -2259,7 +2270,10 @@ sw:
         one: "Mada mpya %{count}"
         other: "Mada mpya %{count} "
       more: "Zaidi"
+      all_categories: "Kategoria Zote"
       sections:
+        about:
+          header_link_text: "Kuhusu"
         messages:
           header_link_text: "Ujumbe"
           links:
