@@ -240,13 +240,18 @@ const Topic = RestModel.extend({
 
   @discourseComputed("unread_posts", "new_posts")
   totalUnread(unreadPosts, newPosts) {
-    deprecated("The totalUnread property of the topic model is deprecated");
+    deprecated("The totalUnread property of the topic model is deprecated", {
+      id: "discourse.topic.totalUnread",
+    });
     return unreadPosts || newPosts;
   },
 
   @discourseComputed("unread_posts", "new_posts")
   displayNewPosts(unreadPosts, newPosts) {
-    deprecated("The displayNewPosts property of the topic model is deprecated");
+    deprecated(
+      "The displayNewPosts property of the topic model is deprecated",
+      { id: "discourse.topic.totalUnread" }
+    );
     return unreadPosts || newPosts;
   },
 
@@ -270,15 +275,19 @@ const Topic = RestModel.extend({
       return customUrl;
     }
 
-    if (highestPostNumber <= lastReadPostNumber) {
-      if (this.get("category.navigate_to_first_post_after_read")) {
-        return this.urlForPostNumber(1);
-      } else {
-        return this.urlForPostNumber(lastReadPostNumber + 1);
-      }
-    } else {
-      return this.urlForPostNumber(lastReadPostNumber + 1);
+    if (
+      lastReadPostNumber >= highestPostNumber &&
+      this.get("category.navigate_to_first_post_after_read")
+    ) {
+      return this.urlForPostNumber(1);
     }
+
+    let postNumber = lastReadPostNumber + 1;
+    if (postNumber > highestPostNumber) {
+      postNumber = highestPostNumber;
+    }
+
+    return this.urlForPostNumber(postNumber);
   },
 
   @discourseComputed("highest_post_number", "url")

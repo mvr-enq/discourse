@@ -273,7 +273,6 @@ ur:
       like_count: "لائیکس"
       topic_count: "ٹاپک"
       post_count: "پوسٹ"
-      user_count: "صارفین"
       active_user_count: "متحرک صارفین"
       contact: "ہم سے رابطہ کریں"
       contact_info: "اس سائٹ کے بارے میں کسی اہم مسئلہ یا فوری معاملہ کی صورت میں، براہ مہربانی %{contact_info} پر رابطہ کریں۔"
@@ -328,7 +327,6 @@ ur:
       remove_confirmation: "کیا آپ واقعی یہ مسودہ حذف کرنا چاہتے ہیں؟"
       new_topic: "نئے ٹاپک کا ڈرافٹ"
       new_private_message: "نیے ذاتی پیغام کا مسودہ"
-      topic_reply: "جواب ڈرافٹ کریں"
       abandon:
         confirm: "آپ کے پاس اس عنوان کے لئے ایک مسودہ ہے۔ آپ اس کے ساتھ کیا کرنا چاہیں گے؟"
         yes_value: "منسوخ"
@@ -1071,7 +1069,6 @@ ur:
       experimental_sidebar:
         options: "اختیارات"
         navigation_section: "نیویگیشن"
-        list_destination_default: "ڈِیفالٹ"
       change: "بدلیں"
       featured_topic: "نمایاں موضوع"
       moderator: "%{user} ایک ماڈریٹر ہے"
@@ -2365,9 +2362,6 @@ ur:
       move_to_inbox:
         title: "اِنباکس میں منتقل کریں"
         help: "پیغام واپس اِنباکس میں منتقل کریں"
-      edit_message:
-        help: "پیغام کی پہلی اشاعت میں ترمیم کریں"
-        title: "ترمیم"
       defer:
         help: "بغیر پڑھا نشان زد کریں"
         title: "ملتوی کریں"
@@ -3059,8 +3053,6 @@ ur:
       this_year: "اِس سال"
       position: "زمرہ جات کے صفحے پر پوزیشن:"
       default_position: "پہلے سے طے شدہ پوزیشن"
-      position_disabled: "زمرہ جات کو سرگرمی کی ترتیب میں دکھایا جائے گا۔ فہرستوں میں زمروں کی ترتیب کو کنٹرول کرنے کے لیے، "
-      position_disabled_click: '"مقررہ زمرہ جات پوزیشنوں" کی سیٹِنگ فعال کریں۔'
       minimum_required_tags: "ایک ٹاپک میں ضروری ٹیگز کی کم از کم تعداد:"
       default_slow_mode: 'اس زمرے میں نئے عنوانات کے لیے "سلو موڈ" کو فعال کریں۔'
       parent: "بالائی زمرہ"
@@ -3951,7 +3943,6 @@ ur:
         go_back: "واپس فہرست پر"
         payload_url: "پَیلوڈ یو.آر.ایل."
         payload_url_placeholder: "https://example.com/postreceive"
-        warn_local_payload_url: "ایسا لگتا ہے کہ آپ ویب ہک کو مقامی یو آر ایل پر سیٹ کرنے کی کوشش کر رہے ہیں۔ مقامی پتے پر پہنچایا گیا واقعہ ضمنی اثرات یا غیر متوقع طرز عمل کا سبب بن سکتا ہے۔ جاری رہے؟"
         secret_invalid: "سیکرٹ میں کوئی بھی خالی حروف نہ ہونا ضروری ہے۔"
         secret_too_short: "سیکرٹس کا کم از کم 12 حروف پر مشتمل ہونا ضروری ہے۔"
         secret_placeholder: "ایک اختیاری سٹرنگ، سِگنَیچر تخلیق کرنے کیلئے استعمال کیا جاتا ہے"
@@ -4238,7 +4229,6 @@ ur:
           is_private: "تھِیم ایک ذاتی گِٹ رِیپَوزِٹَری میں ہے"
           remote_branch: "برانچ کا نام (اختیاری)"
           public_key: "رِیپَوزِٹَری کو درج ذیل پبلک کلید ایکسَیس فراہم کریں:"
-          public_key_note: "اوپر ایک درست پرائیویٹ ریپوزٹری یو آر ایل داخل کرنے کے بعد، ایک SSH کی یہاں تیار اور ڈسپلے کی جائے گی۔"
           install: "انسٹال"
           installed: "انسٹال کیا ہوا"
           install_popular: "مقبول"
@@ -4905,7 +4895,6 @@ ur:
         trust_level_2_users: "ٹرسٹ لَیول 2 کے صارفین"
         trust_level_3_requirements: "ٹرسٹ لَیول 3 کے تقاضے"
         trust_level_locked_tip: "ٹرسٹ لَیول لاک ہے، سِسٹم صارف کا لَیول زیادہ یا کم نہیں کرے گا"
-        trust_level_unlocked_tip: "ٹرسٹ لَیول لاک نہیں ہے، سِسٹم صارف کا لَیول زیادہ یا کم کرسکتا ہے"
         lock_trust_level: "ٹرسٹ لَیول لاک کریں"
         unlock_trust_level: "ٹرسٹ لَیول کا لاک ختم کریں"
         silenced_count: "خاموش کیو ہوئے"
@@ -4965,23 +4954,18 @@ ur:
         delete_confirm: "کیا آپ واقعی یہ صارف سے بھرے جانے والا خانا حذف کرنا چاہتے ہیں؟"
         options: "اختیارات"
         required:
-          title: "سائن اَپ کے وقت درکار ہے؟"
           enabled: "درکار ہے"
           disabled: "درکار نہیں ہے"
         editable:
-          title: "سائن اَپ کے بعد قابل ترمیم؟"
           enabled: "قابلِ ترمیم"
           disabled: "ناقابلِ ترمیم"
         show_on_profile:
-          title: "پبلک پروفائل پر دکھائیں؟"
           enabled: "پروفائل پر دکھائیں؟"
           disabled: "پروفائل پر نہیں دکھایا؟"
         show_on_user_card:
-          title: "صارف کارڈ پر دکھائیں؟"
           enabled: "صارف کارڈ پر دکھایا گیا"
           disabled: "صارف کارڈ پر نہیں دکھایا گیا"
         searchable:
-          title: "قابل تلاش؟"
           enabled: "قابل تلاش؟"
           disabled: "قابل تلاش نہیں"
         field_types:

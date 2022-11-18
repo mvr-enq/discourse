@@ -317,7 +317,6 @@ lt:
       like_count: "Patinka"
       topic_count: "Temos"
       post_count: "Įrašai"
-      user_count: "Nariai"
       active_user_count: "Aktyvūs vartotojai"
       contact: "Kontaktai"
       contact_info: "Atsiradus bet kokiai problemai susijusiai su puslapiu, prašome kontaktuoti %{contact_info}."
@@ -369,7 +368,6 @@ lt:
       remove_confirmation: "Ar tikrai norite ištrinti šį juodraštį?"
       new_topic: "Naujos temos juodraštis"
       new_private_message: "Naujas asmeninės žinutės juodraštis"
-      topic_reply: "Atsakymo juodraštis"
       abandon:
         confirm: "Jūs turite nebaigtą juodraštį šiai tema. Ką norėtumėte daryti su juo?"
         yes_value: "Išmesti"
@@ -1057,7 +1055,6 @@ lt:
       experimental_sidebar:
         options: "Nustatymai"
         navigation_section: "Navigacija"
-        list_destination_default: "Numatytasis"
       change: "pakeisti"
       featured_topic: "Įpatinga tema"
       moderator: "%{user} yra moderatorius"
@@ -2278,9 +2275,6 @@ lt:
       move_to_inbox:
         title: "Perkelti į Pranešimų dėžutę"
         help: "Perkelti žinutes atgal į Pranešimų dėžutę"
-      edit_message:
-        help: "Redaguokite pirmąjį pranešimo įrašą"
-        title: "Redaguoti"
       defer:
         help: "Pažymėti kaip neskaitytą"
         title: "Atidėti"
@@ -2945,8 +2939,6 @@ lt:
       this_year: "šiais metais"
       position: "Pozicija kategorijų puslapyje:"
       default_position: "Numatyta pozicija"
-      position_disabled: "Kategorijos bus rodomos pagal aktyvumą. Tam, kad nustatytum kategorijų rodymo tvarką,"
-      position_disabled_click: 'nueik į "fixed category positions" nustatymus.'
       minimum_required_tags: "Minimalus temoje reikalingas žymų skaičius:"
       default_slow_mode: 'Įgalinkite „lėtąjį režimą“ naujoms šios kategorijos temoms.'
       parent: "Tėvinė kategoriją"
@@ -4052,7 +4044,6 @@ lt:
           import_file_tip: ".tar.gz, .zip arba .dcstyle.json failas, kuriame yra tema"
           is_private: "Tema yra privačioje „git“ saugykloje"
           remote_branch: "Filialo pavadinimas (neprivaloma)"
-          public_key_note: "Aukščiau įvedus galiojantį privačios saugyklos URL, bus sugeneruotas ir čia rodomas SSH raktas."
           install: "diegti"
           installed: "Įrašyta"
           install_popular: "Populiaros"
@@ -4640,7 +4631,6 @@ lt:
         trust_level_2_users: "Vartotojai su 2 Pasitikėjimo Statusu "
         trust_level_3_requirements: "3 pasitikėjimo lygio reikalavimai"
         trust_level_locked_tip: "pasitikėjimo statusas užrakintas, sistema nereklamuos ir nežemins vartotojo"
-        trust_level_unlocked_tip: "pasitikėjimo statusas yra atrakintas, sistema gali reklamuoti ir žeminti vartotoją"
         lock_trust_level: "Užrakinti pasitikėjimo lygį"
         unlock_trust_level: "Atrakinti pasitikėjimo lygį"
         silenced_count: "Nutildytas"
@@ -4696,23 +4686,22 @@ lt:
         delete_confirm: "Ar tikrai nori ištrinti vartotojo lauką?"
         options: "Nustatymai"
         required:
-          title: "Privaloma per prisijungimą?"
+          title: "Privaloma per prisijungimą"
           enabled: "privalomi"
           disabled: "neprivaloma"
         editable:
-          title: "Gali keisti po registracijos?"
+          title: "Gali keisti po registracijos"
           enabled: "redaguojama"
           disabled: "neredaguojama"
         show_on_profile:
-          title: "Rodyti paskyroje viešai"
           enabled: "Rodyti paskyroje"
           disabled: "Nerodyti paskyroje"
         show_on_user_card:
-          title: "Rodyti vartotojo kortelėje?"
+          title: "Rodyti vartotojo kortelėje"
           enabled: "rodoma vartotojo kortelėje"
           disabled: "nerodomas vartotojo kortelėje"
         searchable:
-          title: "Ieškoma?"
+          title: "Ieškoma"
           enabled: "ieškoma"
           disabled: "negalima ieškoti"
         field_types:

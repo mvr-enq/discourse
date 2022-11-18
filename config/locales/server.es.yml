@@ -495,7 +495,6 @@ es:
       Puedes editar tu anterior respuesta para añadir una cita. Para ello, selecciona el texto que quieras citar y pulsa el botón <b>citar respuesta</b> que aparecerá.
 
       Es más fácil leer temas que tengan menos respuestas (aunque más profundas), que tener que leer muchas respuestas individuales.
-    dominating_topic: Has publicado más del %{percent} % de las respuestas, ¿hay alguien más de quien te gustaría saber?
     get_a_room: Has respondido a @%{reply_username} %{count} veces, ¿sabías que también puedes enviarle un mensaje personal directamente?
     too_many_replies: |
       ### Has llegado al límite de respuestas en este tema
@@ -764,7 +763,6 @@ es:
         one: "hace casi %{count} año"
         other: "hace casi %{count} años"
   password_reset:
-    no_token: "Lo sentimos, ese enlace para cambiar la contraseña es demasiado antiguo. Haz clic en el botón Iniciar sesión y utiliza el «olvidé mi contraseña» para obtener un nuevo enlace."
     choose_new: "Escoge una nueva contraseña"
     choose: "Escoge una contraseña"
     update: "Actualizar contraseña"
@@ -2006,7 +2004,7 @@ es:
     delete_merged_stub_topics_after_days: "Número de días que hay que esperar antes de eliminar automáticamente los temas pendientes totalmente fusionados. Poner a 0 para no eliminar nunca los temas pendientes."
     bootstrap_mode_min_users: "Número mínimo de usuarios requerido para desactivar el modo de arranque (establece en 0 para desactivar esta opción)"
     prevent_anons_from_downloading_files: "Impedir que usuarios anónimos descarguen archivos adjuntos."
-    secure_media: 'DEPRECIADO: utiliza el ajuste secure_uploads en su lugar, se eliminará en Discourse 3.0.'
+    secure_media: "DEPRECIADO: utiliza el ajuste secure_uploads en su lugar, se eliminará en Discourse 3.0."
     secure_uploads: 'Limita el acceso a TODAS las subidas (imágenes, vídeo, audio, texto, pdfs, zips y otros). Si se activa la opción de «inicio de sesión obligatorio», solo los usuarios que hayan iniciado sesión podrán acceder a las subidas. De lo contrario, el acceso se limitará solo a las subidas de medios en los mensajes privados y en las categorías privadas. ADVERTENCIA: Esta configuración es compleja y requiere un profundo conocimiento administrativo. Consulta <a target="_blank" href="https://meta.discourse.org/t/-/140017">el tema de subidas seguras en Meta</a> para más detalles.'
     secure_media_allow_embed_images_in_emails: "DEPRECIADO: usar secure_uploads_allow_embed_images_in_emails, se eliminará en Discourse 3.0."
     secure_uploads_allow_embed_images_in_emails: "Permite incrustar imágenes seguras que normalmente estarían redactadas en los correos electrónicos, si su tamaño es menor que el ajuste de «tamaño máximo de la imagen incrustada en el correo electrónico»."
@@ -2106,7 +2104,6 @@ es:
     enable_sitemap: "Generar un sitemap para el sitio e incluirlo en el archivo robots.txt."
     sitemap_page_size: "Número de URLs que incluir en cada página del sitemap. Máximo de 50.000"
     enable_user_status: "(experimental) Permitir a los usuarios establecer un mensaje de estado personalizado (emoji + descripción)."
-    enable_onboarding_popups: "(experimental) Habilitar ventanas emergentes educativas que describan las características clave a los usuarios"
     short_title: "El título corto se utilizará en la pantalla de inicio del usuario, el iniciador u otros lugares donde el espacio puede ser limitado. Debe limitarse a 12 caracteres."
     dashboard_hidden_reports: "Permitir ocultar los informes especificados del panel de control."
     dashboard_visible_tabs: "Elige qué pestañas del panel de control se mostrarán."
@@ -3702,7 +3699,6 @@ es:
     png_to_jpg_conversion_failure_message: "Ha ocurrido un error cuando se convertía desde PNG a JPG."
     optimize_failure_message: "Ha ocurrido un error al optimizar la imagen subida."
     download_failure: "Ha fallado la descarga del archivo del proveedor externo."
-    size_mismatch_failure: "El tamaño del archivo subido a S3 no coincide con el tamaño esperado del stub externo. %{additional_detail}"
     create_multipart_failure: "Fallo al crear una subida en varias partes en el almacenamiento externo."
     abort_multipart_failure: "Fallo al abortar una subida en varias partes en el almacenamiento externo."
     complete_multipart_failure: "Fallo al completar la subida en varias partes en el almacenamiento externo."

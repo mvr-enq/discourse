@@ -181,11 +181,7 @@ class UserUpdater
     end
 
     if attributes.key?(:skip_new_user_tips)
-      user.user_option.seen_popups = if user.user_option.skip_new_user_tips
-        OnboardingPopup.types.values
-      else
-        nil
-      end
+      user.user_option.seen_popups = user.user_option.skip_new_user_tips ? [-1] : nil
     end
 
     # automatically disable digests when mailing_list_mode is enabled
@@ -220,7 +216,7 @@ class UserUpdater
       end
 
       if SiteSetting.enable_user_status?
-        update_user_status(attributes[:status])
+        update_user_status(attributes[:status]) if attributes.has_key?(:status)
       end
 
       name_changed = user.name_changed?

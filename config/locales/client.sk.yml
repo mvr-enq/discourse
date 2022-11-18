@@ -278,7 +278,6 @@ sk:
       like_count: "Páči sa mi"
       topic_count: "Témy"
       post_count: "Príspevky"
-      user_count: "Používatelia"
       active_user_count: "Aktívni používatelia"
       contact: "Kontaktujte nás"
       contact_info: "V prípade kritickej chyby alebo naliehavej záležitosti nás prosím konaktujte na %{contact_info}."
@@ -732,7 +731,6 @@ sk:
       experimental_sidebar:
         options: "Možnosti"
         navigation_section: "Navigácia"
-        list_destination_default: "Predvolené"
       change: "zmeniť"
       moderator: "%{user} je moderátor"
       admin: "%{user} je administrátor"
@@ -1486,8 +1484,6 @@ sk:
       move_to_inbox:
         title: "Presunúť do schránky"
         help: "Presunúť správu späť do schránky"
-      edit_message:
-        title: "Upraviť"
       defer:
         title: "Odložiť"
       list: "Témy"
@@ -1908,8 +1904,6 @@ sk:
       review_group_name: "názov skupiny"
       this_year: "tento rok"
       default_position: "Predvolená pozícia"
-      position_disabled: "Kategórie budú zobrazené podľa aktivity. Pre možnosť ovládania poradia kategórií v zozname,"
-      position_disabled_click: 'povoľte možnosť "pevné poradie kategórií"'
       parent: "Nadradená kategória"
       notifications:
         watching:
@@ -2942,7 +2936,6 @@ sk:
         trust_level_2_users: "Používatelia na stupni dôvery 2"
         trust_level_3_requirements: "Požiadavky pre 3 stupeň dôvery"
         trust_level_locked_tip: "stupeň dôvery je zamknutý, systém používateľovi stupeň nezvýši ani nezníži "
-        trust_level_unlocked_tip: "stupeň dôvery je odomknutý, systém môže používateľovi stupeň zvýšiť alebo znížiť"
         lock_trust_level: "Zamknúť stupeň dôvery"
         unlock_trust_level: "Odomknúť stupeň dôvery"
         suspended_count: "Odobrate práva"
@@ -2991,15 +2984,15 @@ sk:
         delete_confirm: "Ste si istý, že chcete zmazať toto používateľské pole?"
         options: "Možnosti"
         required:
-          title: "Požadované pri registrácii?"
+          title: "Požadované pri registrácii"
           enabled: "povinné"
           disabled: "nepovinné"
         editable:
-          title: "Upravovateľné po registrácii?"
+          title: "Upravovateľné po registrácii"
           enabled: "upravovateľné "
           disabled: "neupravovateľné "
         show_on_profile:
-          title: "Ukázať na verejnom profile?"
+          title: "Ukázať na verejnom profile"
           enabled: "zobrazené na profile"
           disabled: "nezobrazené na profile"
         field_types:

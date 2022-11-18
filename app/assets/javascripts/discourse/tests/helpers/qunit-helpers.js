@@ -127,11 +127,10 @@ export function withFrozenTime(timeString, timezone, callback) {
 
 let _pretenderCallbacks = {};
 
-export function resetSite(siteSettings, extras = {}) {
+export function resetSite(extras = {}) {
   const siteAttrs = {
     ...siteFixtures["site.json"].site,
     ...extras,
-    siteSettings,
   };
 
   PreloadStore.store("site", cloneJSON(siteAttrs));
@@ -276,7 +275,11 @@ export function acceptance(name, optionsOrCallback) {
   } else if (typeof optionsOrCallback === "object") {
     deprecated(
       `${name}: The second parameter to \`acceptance\` should be a function that encloses your tests.`,
-      { since: "2.6.0", dropFrom: "2.9.0.beta1" }
+      {
+        since: "2.6.0",
+        dropFrom: "2.9.0.beta1",
+        id: "discourse.qunit.acceptance-function",
+      }
     );
     options = optionsOrCallback;
   }
@@ -311,9 +314,10 @@ export function acceptance(name, optionsOrCallback) {
       if (settingChanges) {
         mergeSettings(settingChanges);
       }
+
       this.siteSettings = currentSettings();
 
-      resetSite(currentSettings(), siteChanges);
+      resetSite(siteChanges);
 
       this.container = getOwner(this);
 
@@ -407,6 +411,7 @@ QUnit.assert.not = function (actual, message) {
   deprecated("assert.not() is deprecated. Use assert.notOk() instead.", {
     since: "2.9.0.beta1",
     dropFrom: "2.10.0.beta1",
+    id: "discourse.qunit.assert-not",
   });
 
   this.pushResult({

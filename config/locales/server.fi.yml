@@ -128,7 +128,7 @@ fi:
         unsubscribe_not_allowed: "Näin käy, kun tämä käyttäjä ei voi perua tilausta sähköpostitse."
         email_not_allowed: "Näin käy, kun sähköpostiosoite ei ole sallittujen listalla tai on kiellettyjen listalla."
       unrecognized_error: "Tuntematon virhe"
-    secure_uploads_placeholder: "Piilotettu: Tällä sivustolla on suojatut lataukset käytössä, vieraile ketjussa tai katso liitetyt lataukset napsauttamalla Näytä sisältö -painiketta."
+    secure_uploads_placeholder: "Piilotettu: Tällä sivustolla on suojatut lataukset käytössä, vieraile ketjussa tai katso liitetyt lataukset klikkaamalla Näytä sisältö -painiketta."
     view_redacted_media: "Näytä sisältö"
   errors: &errors
     format: ! "%{attribute} %{message}"
@@ -495,7 +495,6 @@ fi:
       Voit muokata edellistä viestiäsi ja lisätä siihen lainauksen maalaamalla lainattavan viestin tekstiä ja klikkaamalla ilmestyvää <b>lainaa</b>-painiketta.
 
       On helpompaa lukea ketjua, jossa on vähemmän pidempiä vastauksia kuin sellaista, jossa on paljon lyhyitä yksittäisiä vastauksia.
-    dominating_topic: Olet lähettänyt yli %{percent} % vastauksista täällä, olisiko aika antaa muiden osallistua keskusteluun?
     get_a_room: Olet vastannut käyttäjälle @%{reply_username} %{count} kertaa, tiesitkö, että voit lähettää hänelle yksityisviestin?
     too_many_replies: |
       ### Olet kirjoittanut enimmäismäärän vastauksia tähän ketjuun
@@ -654,10 +653,10 @@ fi:
   post:
     image_placeholder:
       broken: "Tämä kuva ei toimi"
-      blocked_hotlinked_title: "Kuva on isännöity toisella sivustolla. Avaa se uudessa välilehdessä napsauttamalla."
+      blocked_hotlinked_title: "Kuva on isännöity toisella sivustolla. Avaa se uudessa välilehdessä klikkaamalla."
       blocked_hotlinked: "Ulkoinen kuva"
     media_placeholder:
-      blocked_hotlinked_title: "Mediasisältö on isännöity toisella sivustolla. Avaa se uudessa välilehdessä napsauttamalla."
+      blocked_hotlinked_title: "Mediasisältö on isännöity toisella sivustolla. Avaa se uudessa välilehdessä klikkaamalla."
       blocked_hotlinked: "Ulkoinen mediasisältö"
     hidden_bidi_character: "Kaksisuuntaiset merkit voivat muuttaa tekstin esitysjärjestystä. Tätä voidaan käyttää haitallisen koodin peittämiseen."
     has_likes:
@@ -764,7 +763,6 @@ fi:
         one: "lähes vuosi sitten"
         other: "lähes %{count} vuotta sitten"
   password_reset:
-    no_token: "Tämä salasanan vaihtolinkki on liian vanha. Paina 'Kirjaudu sisään' -painiketta ja valitse 'Unohdin salasanani' saadaksesi uuden linkin."
     choose_new: "Valitse uusi salasana"
     choose: "Valitse salasana"
     update: "Päivitä salasana"
@@ -2006,7 +2004,7 @@ fi:
     delete_merged_stub_topics_after_days: "Kuinka montaa päivää odotetaan ennen kuin täysin yhdistetyt tynkäketjut poistetaan automaattisesti. Jos asetat arvoksi 0, tynkäketjuja ei poistetan koskaan."
     bootstrap_mode_min_users: "Vähimmäismäärä käyttäjiä, joka vaaditaan aloitustilan poistamiseen (aseta 0 poistaaksesi käytöstä)"
     prevent_anons_from_downloading_files: "Estä tuntemattomia käyttäjiä lataamasta liitteitä."
-    secure_media: 'VANHENTUNUT: Käytä tämän sijaan secure_uploads-asetusta, poistetaan Discourse 3.0:ssa.'
+    secure_media: "VANHENTUNUT: Käytä tämän sijaan secure_uploads-asetusta, poistetaan Discourse 3.0:ssa."
     secure_uploads: 'Rajoittaa pääsyä KAIKKIIN latauksiin (kuvat, videot, äänet, tekstit, pdf-tiedostot, zip-tiedostot ja muut). Jos "sisäänkirjautuminen vaaditaan" on käytössä, vain kirjautuneilla käyttäjillä on pääsy latauksiin. Muussa tapauksessa pääsy rajoitetaan vain yksityisviesteihin ja yksityisiin alueisiin ladattuihin mediatiedostoihin. VAROITUS: Tämä asetus on monimutkainen ja vaatii syvällistä hallinnollista ymmärrystä. Katso lisätietoja <a target="_blank" href="https://meta.discourse.org/t/-/140017">turvallisia latauksia palvelimeen käsittelevästä ketjusta Metassa</a>.'
     secure_media_allow_embed_images_in_emails: "VANHENTUNUT: Käytä \"secure_uploads_allow_embed_images_in_emails\"-asetusta, poistetaan Discourse 3.0:ssa."
     secure_uploads_allow_embed_images_in_emails: "Sallii turvallisten kuvien upottamisen, jotka normaalisti karsittaisiin sähköposteissa, jos niiden koko on pienempi kuin \"secure uploads max email embed image size kb\" -asetus."
@@ -2106,7 +2104,6 @@ fi:
     enable_sitemap: "Luo sivustokartta sivustollesi ja sisällytä se robots.txt-tiedostoon."
     sitemap_page_size: "Kuhunkin sivustokartan sivuun lisättävien URL-osoitteiden määrä. Enintään 50 000."
     enable_user_status: "(kokeellinen) Salli käyttäjien asettaa mukautettu tilaviesti (emoji + kuvaus)."
-    enable_onboarding_popups: "(kokeellinen) Ota käyttöön opetusponnahdusikkunat, jotka kuvaavat keskeisiä ominaisuuksia käyttäjille"
     short_title: "Lyhyttä nimeä käytetään käyttäjän aloitusnäytöllä, käynnistysruudussa ja muissa tilanteissa, joissa tilaa on rajallisesti. Sen tulisi olla enintään 12 merkin pituinen."
     dashboard_hidden_reports: "Salli tiettyjen raporttien piilottaminen hallintapaneelista."
     dashboard_visible_tabs: "Valitse mitkä hallintapaneelin välilehdet ovat näkyvillä."
@@ -3545,7 +3542,7 @@ fi:
       title: "Vahvista uusi sähköpostiosoite"
       subject_template: "[%{email_prefix}] Vahvista uusi sähköpostiosoite"
       text_body_template: |
-        Vahvista uusi sähköpostiosoitteesi sivustolla %{site_name} napsauttamalla seuraavaa linkkiä:
+        Vahvista uusi sähköpostiosoitteesi sivustolla %{site_name} klikkaamalla seuraavaa linkkiä:
 
         %{base_url}/u/confirm-new-email/%{email_token}
 
@@ -3698,7 +3695,6 @@ fi:
     png_to_jpg_conversion_failure_message: "PNG:n muuttamisessa JPG:ksi tapahtui virhe."
     optimize_failure_message: "Ladatun kuvan optimoinnissa tapahtui virhe."
     download_failure: "Tiedoston lataaminen ulkoiselta palveluntarjoajalta epäonnistui."
-    size_mismatch_failure: "S3:een ladatun tiedoston koko ei vastannut ulkoisen latauksen tyngän tarkoitettua kokoa. %{additional_detail}"
     create_multipart_failure: "Moniosaisen latauksen luominen ulkoisessa tallennustilassa epäonnistui."
     abort_multipart_failure: "Moniosaisen latauksen hylkääminen ulkoisessa tallennustilassa epäonnistui."
     complete_multipart_failure: "Moniosaisen latauksen viimeistely ulkoisessa tallennustilassa epäonnistui."

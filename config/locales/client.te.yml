@@ -156,7 +156,6 @@ te:
       like_count: "ఇష్టాలు"
       topic_count: "విషయాలు"
       post_count: "టపాలు"
-      user_count: "వాడుకరులు"
       active_user_count: "క్రియాశీల సభ్యులు"
       contact: "మమ్ము సంప్రదించండి"
       contact_info: "ఈ సంధర్భంలో క్లిష్టమైన సమస్య లేదా అత్యవసర విషయం సైట్ ను ప్రభావితం చేస్తుంది, దయచేసి మమ్మల్ని సంప్రదించండి %{contact_info}."
@@ -415,7 +414,6 @@ te:
       experimental_sidebar:
         options: "ఎంపికలు"
         navigation_section: "నావిగేషను"
-        list_destination_default: "అప్రమేయ"
       change: "మార్చు"
       moderator: "%{user} ఒక నిర్వాహకుడు"
       admin: "%{user} ఒక అధికారి"
@@ -850,8 +848,6 @@ te:
     topic:
       create: "కొత్త విషయం"
       create_long: "కొత్త విషయం సృష్టించు"
-      edit_message:
-        title: "సవరించు"
       defer:
         title: "వాయిదావేయి"
       list: "విషయాలు"
@@ -1124,8 +1120,6 @@ te:
       review_group_name: "గుంపు పేరు"
       this_year: "ఈ సంవత్సరం"
       default_position: "అప్రమేయ స్థానం"
-      position_disabled: "వర్గాలు కలాపం వరుసలో చూపబడతాయి. జాబితాల్లో వర్గాల వరుసను నియంత్రించడానికి,"
-      position_disabled_click: '"స్థిర వర్గ స్థాయిలు" అమరికను చేతనం చేయండి'
       parent: "తండ్రి వర్గం"
       notifications:
         watching:
@@ -1872,7 +1866,6 @@ te:
         trust_level_2_users: "నమ్మకం స్థాయి 2 సభ్యులు"
         trust_level_3_requirements: "నమ్మకపు స్థాయి 3 అవసరాలు"
         trust_level_locked_tip: "నమ్మకపు స్థాయి బంధింపబడిఉంది, వ్యవస్థ వినియోగదారుని ప్రోత్సాహించలేదు లేదా స్థాయి తగ్గించలేదు"
-        trust_level_unlocked_tip: "నమ్మకపు స్థాయి బంధింపబడలేదు, వ్యవస్థ వినియోగదారుని ప్రోత్సాహించవచ్చు లేదా స్థాయి తగ్గించవచ్చు"
         lock_trust_level: "నమ్మకపు స్థాయి ని బంధించు"
         unlock_trust_level: "నమ్మకపు స్థాయిని వదిలేయి"
         suspended_count: "సస్పెడయ్యాడు"
@@ -1921,15 +1914,12 @@ te:
         delete_confirm: "మీరు నిజంగా ఈ సభ్య క్షేత్రం తొలగించాలనుకుంటున్నారా?"
         options: "ఎంపికలు"
         required:
-          title: "సైన్అప్ అవసరమా?"
           enabled: "కావాలి"
           disabled: "అవసరంలేదు"
         editable:
-          title: "సైన్అప్ తరువాత సవరించగలమా?"
           enabled: "సవరించదగిన"
           disabled: "సవరించలేని"
         show_on_profile:
-          title: "ప్రజా ప్రవరపై చూపు?"
           enabled: "ప్రవరపై చూపు"
           disabled: "ప్రవరపై చూపబడలేదు"
         field_types:
